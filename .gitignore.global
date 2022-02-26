@@ -1,0 +1,11 @@
+.idea
+Brewfile.lock.json
+**/*bak
+
+vendor/cache/*
+Gemfile
+Gemfile.lock
+
+# my own stuff 
+tmp.txt
+

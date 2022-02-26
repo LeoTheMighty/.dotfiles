@@ -1,0 +1,82 @@
+export PATH="$HOME/.rbenv/bin:$PATH"
+export PATH="/usr/local/opt/openjdk@8/bin:$PATH"
+export PATH=$PATH:/opt/apache-maven/bin
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+
+export NVM_DIR="/Users/leonid.belyi/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+
+function set_aliases() {
+  # global
+  alias kapow='puma-dev -stop && echo -e "\033[32mRestarted puma-dev.\033[0m"'
+  alias ppuma='ps -ax | grep puma'
+  alias mc='cd ~/mycase/mycase_app'
+  alias mclogin='cd ~/mycase/mycase_login && git pull && deps && bin/rails db:migrate && kapow && foreman start'
+  alias mcnotifs='cd ~/mycase/mycase_notifications && git pull && kapow && foreman start'
+  alias pls="bin/yarn"
+  # from project directory
+  alias deps='nvm use && bin/yarn && bundle'
+  alias build='deps && bin/rails db:migrate && kapow'
+  alias rt='bundle exec ruby -Itest'
+  alias brt='CHROME_DEBUG=1 bundle exec ruby -Itest'
+  alias jt='pls test'
+  alias debug='bundle exec pry-remote'
+  alias dev_logs='tail -f log/development.log'
+  alias bullet_logs='tail -f log/bullet.log'
+  alias gl="git log --graph --decorate --pretty=oneline --abbrev-commit"
+  alias gcu="git reset HEAD^"
+  # alias grid="git checkout develop && git pull && git checkout @{-1} && git rebase -i develop"
+  alias gs="git status"
+  alias be="bundle exec"
+  alias migrate="bin/rails db:migrate RAILS_ENV=development"
+  alias endpoint="bundle exec rake routes | grep"
+  # My fuckin own bitch
+  alias gr="git rebase"
+  alias gri="git rebase -i"
+  alias griod="gri origin/develop"
+  alias gro="git rebase -i --onto"
+  alias grc="git rebase --continue"
+  alias gra="git rebase --abort"
+  alias gc="git commit"
+  alias gca="gc --amend"
+  alias gcm="gc -m"
+  alias ga="git add"
+  alias gap="ga -p"
+  alias gat="ga test"
+  alias gaa="ga app"
+  alias gaat="ga app test"
+  alias gaac="gaa; gc"
+  alias gaacm="gaa; gcm"
+  alias gaaca="gaa; gca"
+  alias gatc="gat; gc"
+  alias gatcm="gat; gcm"
+  alias gatca="gat; gca"
+  alias gaatc="gaat; gc"
+  alias gaatcm="gaat; gcm"
+  alias gaatca="gaat; gca"
+  alias gcp="git cherry-pick"
+  alias gch="git checkout"
+  alias gchd"gch develop"
+  alias gpf="git push --force-with-lease"
+  alias gpfo="gpf origin"
+  alias gpfu="gpfo -u"
+  alias gst="git stash"
+  alias gstp="git stash pop"
+  alias gf="git fetch"
+  alias grid="gf && griod"
+  alias fs="foreman start"
+  alias puma_logs="tail -n 100 -f ~/Library/Logs/puma-dev.log"
+}
+set_aliases
+
+autoload -Uz compinit && compinit
+
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
+if command -v pyenv 1>/dev/null 2>&1; then
+  eval "$(pyenv init -)"
+fi
+
+export CLICOLOR=1
+
+source ~/.bash_profile
