@@ -1,4 +1,6 @@
 for file in .*;
 do
-    ln -s $file ../$file
+    if [ "$file" != ".git" ]; then
+        cp $file ../$file
+    fi
 done
