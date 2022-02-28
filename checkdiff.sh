@@ -1,13 +1,14 @@
 for file in .*;
 do
     if [ "$file" != ".git" ]; then
-        echo $file
+        # echo $file
         diff -q $file ../$file
-        echo $status
-        if [[ "$status" -eq 1 ]]; then
-            exit 1
+        # echo "'$status'"
+        if [[ "$status" == "1" ]]; then
+            false
+            break
         fi
     fi
 done
 
-exit 0
+true
