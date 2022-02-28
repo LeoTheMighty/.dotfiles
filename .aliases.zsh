@@ -48,7 +48,6 @@ $diff
     rm tmp.txt
     echo "Git Range-diff copied to clipboard!!"
 }
-alias gpf="grdf; git push --force-with-lease"
 
 function set_aliases() {
     # global
@@ -82,7 +81,9 @@ function set_aliases() {
     # alias gria="git rebase -i --autosquash"
     alias griod="gri origin/develop"
     # alias griad="gria origin/develop"
-    alias gpf="grdf; git push --force-with-lease"
+    alias gpl="git pull"
+    alias gp="git push"
+    alias gpf="grdf; gp --force-with-lease"
     alias gro="gri --onto"
     alias grc="git rebase --continue"
     alias gra="git rebase --abort"
@@ -125,11 +126,10 @@ function set_aliases() {
     alias gaatcanpf="gaat; gcan; gpf"
     alias gcp="git cherry-pick"
     alias gch="git checkout"
-    # alias gchb="git checkout -b"
+    alias gchb="git checkout -b"
     alias gchd"gch develop"
-    alias gpf="grdf; git push --force-with-lease"
+    alias gpf="grdf; gp --force-with-lease"
     alias gpfo="gpf origin"
-    alias gpfu="gpfo -u"
     alias gst="git stash"
     alias gstp="git stash pop"
     alias gf="git fetch"
@@ -138,8 +138,8 @@ function set_aliases() {
     alias gbi="git bisect"
     alias gbig="gbi good"
     alias gbib="gbi bad"
-    # alias grss="git reset --soft"
-    # alias grssh="git reset --soft HEAD~"
+    alias grss="git reset --soft"
+    alias grssh="git reset --soft HEAD~"
     # alias grsh="git reset --hard"
     alias gres="git restore"
     alias gress="git restore --staged"
@@ -150,11 +150,12 @@ function set_aliases() {
     # alias grdf="git range-diff"
     # Migration specific
     alias ms="./bin/rails db:migrate:status"
+    alias yarnst="yarn start"
 }
 set_aliases
 
 function gchb() {
-    git checkout -b $1 origin/$1
+    git checkout -b $1; git push -u origin $1
 }
 function mup() {
     ./bin/rails db:migrate:up VERSION=$1
