@@ -1,3 +1,5 @@
+exit_code=0
+
 for file in .*;
 do
     if [ "$file" != ".git" ]; then
@@ -5,10 +7,10 @@ do
         diff -q $file ../$file
         # echo "'$status'"
         if [[ "$status" == "1" ]]; then
-            false
+            exit_code=1
             break
         fi
     fi
 done
 
-true
+(exit $exit_code)
