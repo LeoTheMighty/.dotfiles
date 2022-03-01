@@ -76,8 +76,8 @@ function set_aliases() {
     # My fuckin own bitch
     alias kill_puma="pkill -9 puma-dev"
     alias reinstall_puma="puma-dev -uninstall; puma-dev -install"
-    alias gr="git rebase"
-    alias gri="git rebase -i --autosquash"
+    alias gr="git rebase --autosquash"
+    alias gri="gr -i"
     # alias gria="git rebase -i --autosquash"
     alias griod="gri origin/develop"
     # alias griad="gria origin/develop"
@@ -85,6 +85,7 @@ function set_aliases() {
     alias gp="git push"
     alias gpf="grdf; gp --force-with-lease"
     alias gro="gri --onto"
+    alias gron="gr --onto"
     alias grc="git rebase --continue"
     alias gra="git rebase --abort"
     alias gc="git commit"
@@ -143,6 +144,7 @@ function set_aliases() {
     # alias grsh="git reset --hard"
     alias gres="git restore"
     alias gress="git restore --staged"
+    alias gd="git diff"
     # alias gcl="git clean -df"
     # Non-git
     alias fs="foreman start"
@@ -151,6 +153,13 @@ function set_aliases() {
     # Migration specific
     alias ms="./bin/rails db:migrate:status"
     alias yarnst="yarn start"
+    alias ys="yarn start"
+    alias ya="yarn add"
+    alias yi="yarn install"
+    alias yb="yarn build"
+    alias yd="yarn deploy"
+    alias yt="yarn test"
+    alias ye="yarn eject"
 }
 set_aliases
 
