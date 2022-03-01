@@ -5,7 +5,7 @@ if [[ "$?" == "1" ]]; then
     echo "putting backup files into '.dotfiles/backup/'"
     for file in .*;
     do
-        if [ "$file" != ".git" ]; then
+        if [ "$file" != ".git" ] && [ "$file" != ".gitignore" ]; then
             mkdir -p backup && cp ../$file backup/$file
             cp $file ../$file
         fi

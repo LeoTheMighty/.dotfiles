@@ -2,7 +2,7 @@ exit_code=0
 
 for file in .*;
 do
-    if [ "$file" != ".git" ]; then
+    if [ "$file" != ".git" ] && [ "$file" != ".gitignore" ]; then
         # echo $file
         diff -q $file ../$file
         # echo "'$status'"
