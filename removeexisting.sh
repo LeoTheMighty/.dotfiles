@@ -1,6 +1,6 @@
-for file in .*;
+for file in "~/.dotfiles/.*";
 do
     if [ "$file" != ".git" ] && [ "$file" != ".gitignore" ]; then
-	rm ../$file
+	rm ~/$file
     fi
 done
