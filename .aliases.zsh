@@ -104,9 +104,11 @@ function set_aliases() {
     alias gaaca="gaa; gca"
     alias gaacarc="gaa; gca; grc"
     alias gaacapf="gaa; gca; gpf"
+    alias gaacarcpf="gaa; gca; grc; gpf"
     alias gaacan="gaa; gcan"
     alias gaacanrc="gaa; gcan; grc"
     alias gaacanpf="gaa; gcan; gpf"
+    alias gaacanrcpf="gaa; gcan; grc; gpf"
     alias gatc="gat; gc"
     alias gatcm="gat; gcm"
     alias gatcf="gat; gcf"
@@ -116,6 +118,7 @@ function set_aliases() {
     alias gatcan="gat; gcan"
     alias gatcanrc="gat; gcan; grc"
     alias gatcanpf="gat; gcan; gpf"
+    alias gatcanrcpf="gat; gcan; grc; gpf"
     alias gaatc="gaat; gc"
     alias gaatcm="gaat; gcm"
     alias gaatcf="gaat; gcf"
@@ -125,6 +128,7 @@ function set_aliases() {
     alias gaatcan="gaat; gcan"
     alias gaatcanrc="gaat; gcan; grc"
     alias gaatcanpf="gaat; gcan; gpf"
+    alias gaatcanrcpf="gaat; gcan; grc; gpf"
     alias gcp="git cherry-pick"
     alias gch="git checkout"
     alias gchb="git checkout -b"
@@ -143,9 +147,11 @@ function set_aliases() {
     alias grssh="git reset --soft HEAD~"
     # alias grsh="git reset --hard"
     alias gres="git restore"
+    alias gresc="git restore config"
     alias gress="git restore --staged"
     alias gd="git diff"
     # alias gcl="git clean -df"
+    alias gbhis="git reflog | egrep -io "moving from ([^[:space:]]+)" | awk '{ print $3 }' | awk ' !x[$0]++' | egrep -v '^[a-f0-9]{40}$' | head -n10"
     # Non-git
     alias fs="foreman start"
     alias puma_logs="tail -n 100 -f ~/Library/Logs/puma-dev.log"
@@ -160,12 +166,19 @@ function set_aliases() {
     alias yd="yarn deploy"
     alias yt="yarn test"
     alias ye="yarn eject"
+    # for updating aliases specifically
+    alias sa="source ~/.dotfiles/update.sh && source ~/.aliases.zsh"
 }
 set_aliases
 
 function gchb() {
     git checkout -b $1; git push -u origin $1
 }
+# function gchro() {
+    # bn=$(git rev-parse --abbrev-ref HEAD)
+    # git checkout $1; gro $bn origin/$bn;
+    # gch $bn; gpf; gch $1
+# }
 function mup() {
     ./bin/rails db:migrate:up VERSION=$1
 }
