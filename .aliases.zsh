@@ -167,7 +167,8 @@ function set_aliases() {
     alias yt="yarn test"
     alias ye="yarn eject"
     # for updating aliases specifically
-    alias udf="source ~/.dotfiles/update.sh && source ~/.aliases.zsh"
+    alias updatedf="source ~/.dotfiles/update.sh && source ~/.aliases.zsh"
+    alias udf="vim ~/.aliases.zsh; updatedf"
 }
 set_aliases
 
