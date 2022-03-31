@@ -1,4 +1,4 @@
-alias bn="echo $(git rev-parse --abbrev-ref HEAD)"
+alias bn="git rev-parse --abbrev-ref HEAD"
 # brew list aha || brew install aha
 alias grd="git range-diff"
 function grdf_print() {
@@ -151,7 +151,7 @@ function set_aliases() {
     alias gress="git restore --staged"
     alias gd="git diff"
     # alias gcl="git clean -df"
-    alias gbhis="git reflog | egrep -io "moving from ([^[:space:]]+)" | awk '{ print $3 }' | awk ' !x[$0]++' | egrep -v '^[a-f0-9]{40}$' | head -n10"
+    alias gbhis="git reflog | egrep -io \"moving from ([^[:space:]]+)\" | awk '{ print $3 }' | awk ' !x[$0]++' | egrep -v '^[a-f0-9]{40}$' | head -n10"
     # Non-git
     alias fs="foreman start"
     alias puma_logs="tail -n 100 -f ~/Library/Logs/puma-dev.log"
@@ -167,12 +167,29 @@ function set_aliases() {
     alias yt="yarn test"
     alias ye="yarn eject"
     # for updating aliases specifically
-    alias sa="source ~/.dotfiles/update.sh && source ~/.aliases.zsh"
+    alias udf="source ~/.dotfiles/update.sh && source ~/.aliases.zsh"
 }
 set_aliases
 
 function gchb() {
     git checkout -b $1; git push -u origin $1
+}
+function fixup() {
+    # first add all the files you wanna commit
+    # then call like so -> "fixup <sha of commit>"
+    if [ "$1" != "" ] # or better, if [ -n "$1" ]
+    then
+        gcf "$1"
+        gri --autostash "$1"^
+    fi
+}
+function gafixup() {
+    ga $1
+    if [ "$2" != "" ]
+    then
+        gcf "$2"
+        gri --autostash "$2"^
+    fi
 }
 # function gchro() {
     # bn=$(git rev-parse --abbrev-ref HEAD)
