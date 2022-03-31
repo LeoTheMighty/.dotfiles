@@ -170,6 +170,7 @@ function set_aliases() {
     alias updatedf="source ~/.dotfiles/update.sh && source ~/.aliases.zsh"
     alias udf="vim ~/.aliases.zsh; updatedf"
     alias testtest="echo \"Hello world\""
+    alias ttttt="echo \"hey\""
 }
 set_aliases
 
