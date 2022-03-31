@@ -53,11 +53,6 @@ do
             gcm "Update $file from $place changes"
             gp
         fi
-
-        # echo "cp $HOME/$file $dir/backup/$file"
-        # echo "cp $dir/$file $HOME/$file"
-        # mkdir -p "$dir/backup" && cp "~/$file" "$dir/backup/$file"
-        # cp "$dir/$file" "~/$file"
     fi
     echo
 done
