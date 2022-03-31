@@ -12,17 +12,11 @@ do
     if [ "$file" != ".git" ] && [ "$file" != ".gitignore" ]; then
         local="$HOME/$file"
         repo="$dir/$file"
-        echo "Local = $local, Repo = $repo"
-        echo "git diff -s --exit-code $file"
         git diff -s --exit-code $file
         gitdiff="$?"
-        echo "diff -q $local $repo"
         diff -q $local $repo
         localdiff="$status"
-        echo "localdiff = $localdiff, gitdiff = $gitdiff"
         backup="$dir/backup/$file"
-        echo "Backup = $backup"
-
         if [[ "$localdiff" == "1" ]]; then
             if [[ "$gitdiff" == "1" ]]; then
                 cp $local $backup
@@ -31,7 +25,7 @@ do
                 cp $local $repo
                 git diff -s --exit-code $file
                 localtogitdiff="$?"
-                echo "localtogitdiff = $localtogitdiff"
+                echo "Updating $local from $repo:"
                 cp $tmp $repo
                 rm $tmp
                 cp $repo $local
@@ -43,18 +37,20 @@ do
                 fi
                 place="repo"
             else
+                echo "Updating $local from $repo"
                 cp $local $repo
                 place="local"
             fi
         fi
 
         if [[ "$localdiff" == "1" ]] || [[ "$gitdiff" == "1" ]]; then
+            echo "Updating git repo from $place changes"
+            echo "-------------------------------------"
             ga $repo
             gcm "Update $file from $place changes"
             gp
         fi
     fi
-    echo
 done
 
 # For each file
@@ -97,5 +93,5 @@ done
 #   ga $repo; gcm "Update $file from $place changes"; gp
 # fi
 
-cd -
+cd ~-
 
