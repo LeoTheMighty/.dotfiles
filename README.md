@@ -22,3 +22,7 @@ Then, if you do it manually, just use `updatedf` in order to update it at your l
 
 ## Customizing it
 Basically whatever files are currently inside the repo, it will try to match that to the local versions outside of the repo, so if you want to fork this repo and make it your own, you would basically first copy all your dotfiles that you want to keep track of onto the repo, and then run the `updatedf` function and it should handle it.
+
+## Ideas
+* Use `git check-ignore` to see what's ignored and don't parse it?
+* Make a custom file list that will dictate exactly what to track
