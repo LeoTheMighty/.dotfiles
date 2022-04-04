@@ -78,6 +78,7 @@ function set_aliases() {
     alias reinstall_puma="puma-dev -uninstall; puma-dev -install"
     alias gr="git rebase --autosquash"
     alias gri="gr -i"
+    alias grias="gri --autostash"
     # alias gria="git rebase -i --autosquash"
     alias griod="gri origin/develop"
     # alias griad="gria origin/develop"
@@ -167,7 +168,8 @@ function set_aliases() {
     alias yt="yarn test"
     alias ye="yarn eject"
     # for updating aliases specifically
-    alias updatedf="source ~/.dotfiles/update.sh && source ~/.aliases.zsh"
+    alias sal="source ~/.aliases.zsh"
+    alias updatedf="source ~/.dotfiles/update.sh && sal"
     alias udf="vim ~/.aliases.zsh; updatedf"
 }
 set_aliases
@@ -181,7 +183,7 @@ function fixup() {
     if [ "$1" != "" ] # or better, if [ -n "$1" ]
     then
         gcf "$1"
-        gri --autostash "$1"^
+        grias "$1"^
     fi
 }
 function gafixup() {
@@ -189,7 +191,7 @@ function gafixup() {
     if [ "$2" != "" ]
     then
         gcf "$2"
-        gri --autostash "$2"^
+        grias "$2"^
     fi
 }
 # function gchro() {
