@@ -84,7 +84,6 @@ function set_aliases() {
     # alias griad="gria origin/develop"
     alias gpl="git pull"
     alias gp="git push"
-    alias gpu="git push origin $(bn) -u"
     alias gpf="grdf; gp --force-with-lease"
     alias gro="gri --onto"
     alias gron="gr --onto"
@@ -175,6 +174,9 @@ function set_aliases() {
 }
 set_aliases
 
+function gpu() {
+    git push origin $(bn) -u
+}
 function gchb() {
     git checkout -b $1; git push -u origin $1
 }
