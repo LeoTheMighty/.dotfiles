@@ -174,6 +174,10 @@ function set_aliases() {
 }
 set_aliases
 
+function copy() {
+    # copies a file to your clipboard
+    cat $1 | pbcopy
+}
 function gpu() {
     git push origin $(bn) -u
 }
