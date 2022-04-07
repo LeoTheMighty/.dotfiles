@@ -241,3 +241,7 @@ function gacanrc() {
 function gacanpf() {
     ga $1; gcan; gpf;
 }
+function run_on_startup() {
+    startes
+
+}
