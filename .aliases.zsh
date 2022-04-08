@@ -210,15 +210,15 @@ function gafixup() {
 # }
 function start_kafka() {
     dir="/Users/leonid.belyi/mycase/kafka_2.13-3.1.0"
-    source "$dir/bin/zookeeper-server-start.sh $dir/config/zookeeper.properties"
-    source "$dir/bin/kafka-server-start.sh /Users/leonid.belyi/mycase/mycase_app/config/kafka.dev.server.properties"
-    source "$dir/bin/kafka-topics.sh --list --bootstrap-server localhost:9092"
+    ./$dir/bin/zookeeper-server-start.sh $dir/config/zookeeper.properties
+    ./$dir/bin/kafka-server-start.sh /Users/leonid.belyi/mycase/mycase_app/config/kafka.dev.server.properties
+    ./$dir/bin/kafka-topics.sh --list --bootstrap-server localhost:9092
     echo "Kafka successfully started!"
 }
 function stop_kafka() {
     dir="/Users/leonid.belyi/mycase/kafka_2.13-3.1.0"
-    source "$dir/bin/zookeeper-server-stop.sh"
-    source "$dir/bin/kafka-server-stop.sh"
+    ./$dir/bin/zookeeper-server-stop.sh
+    ./$dir/bin/kafka-server-stop.sh
     echo "Kafka successfully stopped."
 }
 function mup() {
