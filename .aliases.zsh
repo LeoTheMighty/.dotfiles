@@ -208,6 +208,19 @@ function gafixup() {
     # git checkout $1; gro $bn origin/$bn;
     # gch $bn; gpf; gch $1
 # }
+function start_kafka() {
+    dir="/Users/leonid.belyi/mycase/kafka_2.13-3.1.0"
+    source "$dir/bin/zookeeper-server-start.sh $dir/config/zookeeper.properties"
+    source "$dir/bin/kafka-server-start.sh /Users/leonid.belyi/mycase/mycase_app/config/kafka.dev.server.properties"
+    source "$dir/bin/kafka-topics.sh --list --bootstrap-server localhost:9092"
+    echo "Kafka successfully started!"
+}
+function stop_kafka() {
+    dir="/Users/leonid.belyi/mycase/kafka_2.13-3.1.0"
+    source "$dir/bin/zookeeper-server-stop.sh"
+    source "$dir/bin/kafka-server-stop.sh"
+    echo "Kafka successfully stopped."
+}
 function mup() {
     ./bin/rails db:migrate:up VERSION=$1
 }
