@@ -173,8 +173,8 @@ function set_aliases() {
     alias sal="source ~/.aliases.zsh"
     alias updatedf="source ~/.dotfiles/update.sh && sal"
     alias updatedfedit="source ~/.dotfiles/update.sh 1 && sal"
-    alias udf="vim ~/.aliases.zsh; updatedf"
-    alias udfe="vim ~/.aliases.zsh; updatedfedit"
+    alias udf="vim ~/.aliases.zsh; updatedfedit"
+    alias udfn="vim ~/.aliases.zsh; updatedf" # no edit
     alias helloworld="echo \"Hello world!\""
 }
 set_aliases
@@ -224,7 +224,7 @@ function kafka() {
 function kafkapr() {
     dir="/Users/leonid.belyi/mycase/kafka"
     echo "Type messages to send to topic: \"$1\""
-    $dir/kafka-console-producer.sh --broker-list localhost:29092 --topic $1
+    $dir/bin/kafka-console-producer.sh --broker-list localhost:29092 --topic $1
 }
 function mup() {
     ./bin/rails db:migrate:up VERSION=$1
