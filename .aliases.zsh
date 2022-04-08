@@ -218,6 +218,11 @@ function kafka() {
     # Kill zookeeper once kafka stops
     kill $zookeeperpid
 }
+function kafkapr() {
+    dir="/Users/leonid.belyi/mycase/kafka"
+    echo "Type messages to send to topic: \"$1\""
+    $dir/kafka-console-producer.sh --broker-list localhost:29092 --topic $1
+}
 function mup() {
     ./bin/rails db:migrate:up VERSION=$1
 }
