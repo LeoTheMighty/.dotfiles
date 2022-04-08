@@ -213,7 +213,7 @@ function kafka() {
     echo "Running Zookeeper in background"
     $dir/bin/zookeeper-server-start.sh $dir/config/zookeeper.properties &
     zookeeperpid=$!
-    sleep 2
+    sleep 4
     $dir/bin/kafka-server-start.sh /Users/leonid.belyi/mycase/mycase_app/config/kafka.dev.server.properties
     # Kill zookeeper once kafka stops
     kill $zookeeperpid
