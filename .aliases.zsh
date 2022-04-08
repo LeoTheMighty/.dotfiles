@@ -210,7 +210,7 @@ function gafixup() {
 # }
 function kafka() {
     dir="/Users/leonid.belyi/mycase/kafka"
-    echo "Running Zookeeper in background"
+    echo "Running Zookeeper in background (waiting 4 seconds to allow it to start)"
     $dir/bin/zookeeper-server-start.sh $dir/config/zookeeper.properties &
     zookeeperpid=$!
     sleep 4
