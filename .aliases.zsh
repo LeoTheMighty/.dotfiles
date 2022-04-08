@@ -243,5 +243,5 @@ function gacanpf() {
 }
 function run_on_startup() {
     startes
-
+    start_agent
 }
