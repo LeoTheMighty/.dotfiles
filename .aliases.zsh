@@ -172,7 +172,9 @@ function set_aliases() {
     # for updating aliases specifically
     alias sal="source ~/.aliases.zsh"
     alias updatedf="source ~/.dotfiles/update.sh && sal"
+    alias updatedfedit="source ~/.dotfiles/update.sh 1 && sal"
     alias udf="vim ~/.aliases.zsh; updatedf"
+    alias udfe="vim ~/.aliases.zsh; updatedfedit"
 }
 set_aliases
 
