@@ -8,4 +8,7 @@ Gemfile.lock
 
 # my own stuff 
 tmp.txt
+# my helper scripts
+/run_docker.sh
+/run_fargate.sh
 
