@@ -209,7 +209,8 @@ function gafixup() {
     # gch $bn; gpf; gch $1
 # }
 function kafka() {
-    dir="/Users/leonid.belyi/mycase/kafka_2.13-3.1.0"
+    dir="/Users/leonid.belyi/mycase/kafka"
+    echo "Running Zookeeper in background"
     $dir/bin/zookeeper-server-start.sh $dir/config/zookeeper.properties &
     zookeeperpid=$!
     sleep 2
