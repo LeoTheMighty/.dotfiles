@@ -1,10 +1,13 @@
-realpath () {
-  [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
-}
-cd "$(dirname "$(realpath "$0")")"; # cd into script directory
+# realpath () {
+  # [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}"
+# }
+# cd "$(dirname "$(realpath "$0")")"; # cd into script directory
+
+editcommit=$1
 
 dir="$HOME/.dotfiles"
 
+cd $dir
 for file in $dir/.*;
 do
     [ -e "$file" ] || continue
@@ -12,7 +15,7 @@ do
     if [ "$file" != ".git" ] && [ "$file" != ".gitignore" ]; then
         local="$HOME/$file"
         repo="$dir/$file"
-        git diff -s --exit-code $file
+        git diff -s --exit-code $repo
         gitdiff="$?"
         diff -q $local $repo
         localdiff="$status"
@@ -23,7 +26,7 @@ do
                 tmp="$dir/tmp"
                 cp $repo $tmp
                 cp $local $repo
-                git diff -s --exit-code $file
+                git diff -s --exit-code $repo
                 localtogitdiff="$?"
                 echo "Updating $local from $repo:"
                 cp $tmp $repo
@@ -46,12 +49,16 @@ do
         if [[ "$localdiff" == "1" ]] || [[ "$gitdiff" == "1" ]]; then
             echo "Updating git repo from $place changes"
             echo "-------------------------------------"
-            ga $repo
-            gcm "Update $file from $place changes"
-            gp
+            git add $repo
+            git commit -m "Update $file from $place changes"
+            if [[ "$editcommit" != "" ]]; then
+                git commit --amend
+            fi
+            git push
         fi
     fi
 done
+cd ~-
 
 # For each file
 
@@ -93,5 +100,5 @@ done
 #   ga $repo; gcm "Update $file from $place changes"; gp
 # fi
 
-cd ~-
+# cd ~-
 
