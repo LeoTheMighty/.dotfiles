@@ -161,6 +161,7 @@ function set_aliases() {
     alias stopes="docker container stop elasticsearch7.7.0"
     # Migration specific
     alias ms="./bin/rails db:migrate:status"
+    # Yarn usage
     alias yarnst="yarn start"
     alias ys="yarn start"
     alias ya="yarn add"
@@ -169,6 +170,8 @@ function set_aliases() {
     alias yd="yarn deploy"
     alias yt="yarn test"
     alias ye="yarn eject"
+    # github pages
+    alias ds="gp; yd"
     # for updating aliases specifically
     alias sal="source ~/.aliases.zsh"
     alias updatedf="source ~/.dotfiles/update.sh && sal"
