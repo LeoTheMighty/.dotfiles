@@ -157,8 +157,13 @@ function set_aliases() {
     alias fs="foreman start"
     alias puma_logs="tail -n 100 -f ~/Library/Logs/puma-dev.log"
     # alias grdf="git range-diff"
+    # Elasticsearch
+    alias ski="docker container start kibana7.7.0"
+    alias stki="docker container stop kibana7.7.0"
     alias startes="docker container start elasticsearch7.7.0"
     alias stopes="docker container stop elasticsearch7.7.0"
+    alias ses="startes; ski"
+    alias stes="stopes; ski"
     # Migration specific
     alias ms="./bin/rails db:migrate:status"
     # Yarn usage
