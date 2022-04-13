@@ -229,6 +229,11 @@ function kafkapr() {
     echo "Type messages to send to topic: \"$1\""
     $dir/bin/kafka-console-producer.sh --broker-list localhost:29092 --topic $1
 }
+function kibana() {
+    dir="/Users/leonid.belyi/mycase/kibana"
+    echo "Running Kibana"
+    $dir/bin/kibana
+}
 function mup() {
     ./bin/rails db:migrate:up VERSION=$1
 }
