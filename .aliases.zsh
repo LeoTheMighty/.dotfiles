@@ -183,11 +183,26 @@ function set_aliases() {
     alias sal="source ~/.aliases.zsh"
     alias updatedf="source ~/.dotfiles/update.sh && sal"
     alias updatedfedit="source ~/.dotfiles/update.sh 1 && sal"
-    alias udf="vim ~/.aliases.zsh; updatedfedit"
-    alias udfn="vim ~/.aliases.zsh; updatedf" # no edit
-    alias helloworld="echo \"Hello world!\""
+    # alias udf="vim ~/.aliases.zsh; updatedfedit"
+    # alias udfn="vim ~/.aliases.zsh; updatedf" # no edit
 }
 set_aliases
+
+function udf() {
+    vim ~/.aliases.zsh "$@"
+    updatedf
+}
+function udfn() { # no edit
+    vim ~/.aliases.zsh "$@"
+    updatedfedit
+}
+function run_in_rc_file() {
+    export DISABLE_SPRING=true
+}
+function run_on_startup() {
+    startes
+    start_agent
+}
 
 function copy() {
     # copies a file to your clipboard
@@ -273,8 +288,4 @@ function gacanrc() {
 }
 function gacanpf() {
     ga $1; gcan; gpf;
-}
-function run_on_startup() {
-    startes
-    start_agent
 }
