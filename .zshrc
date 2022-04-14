@@ -1,6 +1,6 @@
 source ~/.aliases.zsh
 
-run_on_rc_file
+run_in_rc_file
 
 export PATH="$HOME/.rbenv/bin:$PATH"
 export PATH="/usr/local/opt/openjdk@8/bin:$PATH"
