@@ -189,6 +189,7 @@ function set_aliases() {
 set_aliases
 
 function udf() {
+    echo "$@"
     vim ~/.aliases.zsh "$@"
     updatedf
 }
