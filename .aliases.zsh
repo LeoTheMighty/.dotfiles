@@ -225,7 +225,7 @@ function kafka() {
     $dir/bin/zookeeper-server-start.sh $dir/config/zookeeper.properties &
     zookeeperpid=$!
     sleep 4
-    $dir/bin/kafka-server-start.sh /Users/leonid.belyi/mycase/mycase_app/config/kafka.dev.server.properties
+    $dir/bin/kafka-server-start.sh $dir/config/kafka.dev.server.properties
     # Kill zookeeper once kafka stops
     kill $zookeeperpid
 }
