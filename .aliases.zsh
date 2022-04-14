@@ -52,6 +52,8 @@ $diff
 function set_aliases() {
     # global
     alias kapow='puma-dev -stop && echo -e "\033[32mRestarted puma-dev.\033[0m"'
+    alias puma-stop='launchctl unload ~/Library/LaunchAgents/io.puma.dev.plist'
+    alias puma-start='launchctl load ~/Library/LaunchAgents/io.puma.dev.plist'
     alias ppuma='ps -ax | grep puma'
     alias mc='cd ~/mycase/mycase_app'
     alias mclogin='cd ~/mycase/mycase_login && git pull && deps && bin/rails db:migrate && kapow && foreman start'
