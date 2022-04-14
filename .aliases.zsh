@@ -194,7 +194,7 @@ function udf() {
     else
         vim "$@"
     fi
-    updatedf
+    updatedfedit
 }
 function udfn() { # no edit
     if [[ "$@" == "" ]]; then
@@ -202,7 +202,7 @@ function udfn() { # no edit
     else
         vim "$@"
     fi
-    updatedfedit
+    updatedf
 }
 function run_in_rc_file() {
     export DISABLE_SPRING=true
