@@ -189,12 +189,19 @@ function set_aliases() {
 set_aliases
 
 function udf() {
-    echo "$@"
-    vim ~/.aliases.zsh "$@"
+    if [[ "$@" == "" ]]; then
+        vim ~/.aliases.zsh
+    else
+        vim "$@"
+    fi
     updatedf
 }
 function udfn() { # no edit
-    vim ~/.aliases.zsh "$@"
+    if [[ "$@" == "" ]]; then
+        vim ~/.aliases.zsh
+    else
+        vim "$@"
+    fi
     updatedfedit
 }
 function run_in_rc_file() {
