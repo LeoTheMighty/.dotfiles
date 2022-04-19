@@ -1,4 +1,5 @@
 alias bn="git rev-parse --abbrev-ref HEAD"
+alias pb="git rev-parse --abbrev-ref @{-1}"
 # brew list aha || brew install aha
 alias grd="git range-diff"
 function grdf_print() {
