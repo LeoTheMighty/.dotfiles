@@ -90,6 +90,7 @@ function set_aliases() {
     alias gpf="grdf; gp --force-with-lease"
     alias gro="gri --onto"
     alias gron="gr --onto"
+    alias grop="gro $(pb)"
     alias grc="git rebase --continue"
     alias gra="git rebase --abort"
     alias gc="git commit"
