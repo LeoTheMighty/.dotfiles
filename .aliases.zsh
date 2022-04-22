@@ -164,10 +164,14 @@ function set_aliases() {
     # Elasticsearch
     alias ski="docker container start kibana"
     alias stki="docker container stop kibana"
+    alias ski2="docker container start kibana2"
+    alias stki2="docker container stop kibana2"
     alias startes="docker container start elasticsearch"
     alias stopes="docker container stop elasticsearch"
-    alias ses="startes; ski"
-    alias stes="stopes; stki"
+    alias startes2="docker container start elasticsearch2"
+    alias stopes2="docker container stop elasticsearch2"
+    alias ses="startes; startes2; ski; ski2"
+    alias stes="stopes; stopes2; stki; stki2"
     # Migration specific
     alias ms="./bin/rails db:migrate:status"
     # Yarn usage
