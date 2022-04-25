@@ -90,7 +90,6 @@ function set_aliases() {
     alias gpf="grdf; gp --force-with-lease"
     alias gro="gri --onto"
     alias gron="gr --onto"
-    alias grop="gro $(pb)"
     alias grc="git rebase --continue"
     alias gra="git rebase --abort"
     alias gc="git commit"
@@ -223,8 +222,8 @@ function copy() {
 function gpu() {
     git push origin $(bn) -u
 }
-function gchb() {
-    git checkout -b $1; git push -u origin $1
+function grop() {
+    gro $(pb) $1
 }
 function fixup() {
     # first add all the files you wanna commit
