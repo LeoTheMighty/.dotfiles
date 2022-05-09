@@ -267,6 +267,12 @@ function kibana() {
     echo "Running Kibana"
     $dir/bin/kibana
 }
+function setup_es() {
+    docker network create esnetwork
+    docker run -d --name elasticsearch --net esnetwork -p 9201:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearch:7.7.0
+    docker run -d --name kibana --net esnetwork -p 5601:5601 -e "discovery.type=single-node" -e ELASTICSEARCH_URL=http:elasticsearch:9201 kibana:7.7.0
+    docker run -d --name elasticsearch2 --net esnetwork -p 9202:9200 -e "discovery.type=single-node" elasticsearch:7.7.0
+}
 function mup() {
     ./bin/rails db:migrate:up VERSION=$1
 }
