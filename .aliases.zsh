@@ -188,6 +188,8 @@ function set_aliases() {
     alias updatedfedit="source ~/.dotfiles/update.sh 1 && sal"
     # alias udf="vim ~/.aliases.zsh; updatedfedit"
     # alias udfn="vim ~/.aliases.zsh; updatedf" # no edit
+    # Maven
+    alias mci="mvn clean install"
 }
 set_aliases
 
