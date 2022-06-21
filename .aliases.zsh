@@ -76,6 +76,7 @@ function set_aliases() {
     alias be="bundle exec"
     alias migrate="bin/rails db:migrate RAILS_ENV=development"
     alias endpoint="bundle exec rake routes | grep"
+    alias generate_endpoints="rails route_javascript:generate_json"
     # My fuckin own bitch
     alias kill_puma="pkill -9 puma-dev"
     alias reinstall_puma="puma-dev -uninstall; puma-dev -install"
