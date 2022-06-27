@@ -32,6 +32,8 @@ export SENTRY_DSN=""
 # export AWS_SHARED_CREDENTIALS_FILE="~/.aws/credentials"
 # export AWS_PROFILE="dev"
 export ENV="DEVELOPMENT"
+export DISABLE_SPRING=true
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
 alias logbook="/Users/leonid.belyi/logbook/new_log_book.sh"
 . "$HOME/.cargo/env"
