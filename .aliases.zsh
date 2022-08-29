@@ -181,6 +181,7 @@ function set_aliases() {
     alias yd="yarn deploy"
     alias yt="yarn test"
     alias ye="yarn eject"
+    alias yarnd="yarn dev"
     # github pages
     alias ds="gp; yd"
     # for updating aliases specifically
