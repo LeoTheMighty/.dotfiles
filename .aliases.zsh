@@ -159,6 +159,7 @@ function set_aliases() {
     alias gbhis="git reflog | egrep -io \"moving from ([^[:space:]]+)\" | awk '{ print $3 }' | awk ' !x[$0]++' | egrep -v '^[a-f0-9]{40}$' | head -n10"
     # Non-git
     alias fs="foreman start"
+    alias bfs="build; fs"
     alias puma_logs="tail -n 100 -f ~/Library/Logs/puma-dev.log"
     # alias grdf="git range-diff"
     # Elasticsearch
