@@ -284,6 +284,9 @@ function mup() {
 function mdown() {
     ./bin/rails db:migrate:down VERSION=$1
 }
+function mroll() {
+    ./bin/rails db:rollback STEP=$1
+}
 function gac() {
     ga $1; gc;
 }
