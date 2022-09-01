@@ -292,6 +292,14 @@ function mroll() {
         ./bin/rails db:rollback
     fi
 }
+function mredo() {
+    if [ "$1" != "" ]
+    then
+        mroll $1; migrate
+    else
+        mroll; migrate
+    fi
+}
 function gac() {
     ga $1; gc;
 }
