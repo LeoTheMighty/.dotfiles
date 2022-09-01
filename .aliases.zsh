@@ -285,7 +285,12 @@ function mdown() {
     ./bin/rails db:migrate:down VERSION=$1
 }
 function mroll() {
-    ./bin/rails db:rollback STEP=$1
+    if [ "$1" != "" ]
+    then
+        ./bin/rails db:rollback STEP=$1
+    else
+        ./bin/rails db:rollback
+    fi
 }
 function gac() {
     ga $1; gc;
