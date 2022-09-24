@@ -2,7 +2,7 @@
 [user]
 # Please adapt and uncomment the following lines:
 	name = Leo Belyi
-	email = leonid.belyi@mycase.com
+	email = leonid@ac93.org
 [core]
 	excludesfile = ~/.gitignore.global
 [filter "lfs"]
