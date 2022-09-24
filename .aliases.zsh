@@ -253,7 +253,7 @@ function gafixup() {
     # gch $bn; gpf; gch $1
 # }
 function kafka() {
-    dir="/Users/leonid.belyi/mycase/kafka"
+    dir="/Users/leo.belyi/mycase/kafka"
     echo "Running Zookeeper in background (waiting 4 seconds to allow it to start)"
     $dir/bin/zookeeper-server-start.sh $dir/config/zookeeper.properties &
     zookeeperpid=$!
@@ -263,12 +263,12 @@ function kafka() {
     kill $zookeeperpid
 }
 function kafkapr() {
-    dir="/Users/leonid.belyi/mycase/kafka"
+    dir="/Users/leo.belyi/mycase/kafka"
     echo "Type messages to send to topic: \"$1\""
     $dir/bin/kafka-console-producer.sh --broker-list localhost:29092 --topic $1
 }
 function kibana() {
-    dir="/Users/leonid.belyi/mycase/kibana"
+    dir="/Users/leo.belyi/mycase/kibana"
     echo "Running Kibana"
     $dir/bin/kibana
 }
