@@ -35,5 +35,7 @@ export ENV="DEVELOPMENT"
 export DISABLE_SPRING=true
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
-alias logbook="/Users/leonid.belyi/logbook/new_log_book.sh"
+alias logbook="/Users/leo.belyi/logbook/new_log_book.sh"
 . "$HOME/.cargo/env"
+export PATH="$HOME/.rbenv/bin:$PATH"
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
