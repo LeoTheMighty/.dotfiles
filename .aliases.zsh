@@ -1,3 +1,4 @@
+alias ch="git rev-parse HEAD --short"
 alias bn="git rev-parse --abbrev-ref HEAD"
 alias pb="git rev-parse --abbrev-ref @{-1}"
 # brew list aha || brew install aha
@@ -246,6 +247,26 @@ function gafixup() {
         gcf "$2"
         grias "$2"^
     fi
+}
+
+function gpfchain() {
+    # Usage: Right before running gpf, run this instead to update all in the chain as well
+    # Usage gpfchain branch1 branch2 ...
+    bn=$(git rev-parse --abbrev-ref HEAD)
+    gch "origin/$bn"
+    ch=$(git rev-parse HEAD --short)
+    gch $bn
+    gpf
+    prev="$bn"
+    for branch in "$@"
+    do
+        gch branch
+        tmph=$(git rev-parse HEAD --short)
+        gro "$prev" $ch
+        ch="$tmph"
+        prev="$branch"
+        gpf
+    done
 }
 # function gchro() {
     # bn=$(git rev-parse --abbrev-ref HEAD)
