@@ -1,4 +1,5 @@
 export PATH="$HOME/.rbenv/bin:$PATH"
+export PATH="/opt/homebrew/opt/mysql@5.7/bin:$PATH"
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 
 SSH_ENV="$HOME/.ssh/agent-environment"
