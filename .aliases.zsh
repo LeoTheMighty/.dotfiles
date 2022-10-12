@@ -305,6 +305,9 @@ function mup() {
 function mdown() {
     ./bin/rails db:migrate:down VERSION=$1
 }
+function mdownup() {
+    mdown $1; mup $1
+}
 function mroll() {
     if [ "$1" != "" ]
     then
