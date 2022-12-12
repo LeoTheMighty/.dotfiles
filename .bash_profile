@@ -28,7 +28,6 @@ fi
 export S3_UPLOAD_BUCKET="dev.mycase.us-east-1.document-search"
 export SQS_REQUEST_QUEUE_NAME="dev_leonidbelyi_document_parse_request"
 export SQS_COMPLETE_QUEUE_NAME="dev_leonidbelyi_document_parsed"
-export SENTRY_DSN=""
 # export AWS_CONFIG_FILE="~/.aws/config"
 # export AWS_SHARED_CREDENTIALS_FILE="~/.aws/credentials"
 # export AWS_PROFILE="dev"
