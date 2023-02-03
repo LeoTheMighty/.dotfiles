@@ -163,6 +163,13 @@ function set_aliases() {
     alias bfs="build; fs"
     alias puma_logs="tail -n 100 -f ~/Library/Logs/puma-dev.log"
     # alias grdf="git range-diff"
+    # MyCase Console Access
+    alias kmca="blessh dev mycase@stag3console1.stag.mc"
+    alias kmca2="blessh dev mycase@stag3console2.stag.mc"
+    alias kmcl="blesssh dev mycase@stag7console1.stag.mc"
+    alias kmcl2="blesssh dev mycase@stag7console2.stag.mc"
+    alias pmca="blessh dev mycase@prod3console1.prod.mc"
+    alias pmca2="blessh dev mycase@prod3console2.prod.mc"
     # Elasticsearch
     alias ski="docker container start kibana"
     alias stki="docker container stop kibana"
