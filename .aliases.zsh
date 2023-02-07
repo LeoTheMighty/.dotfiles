@@ -170,6 +170,7 @@ function set_aliases() {
     alias kmcl2="blesssh dev mycase@stag7console2.stag.mc"
     alias pmca="blessh dev mycase@prod3console1.prod.mc"
     alias pmca2="blessh dev mycase@prod3console2.prod.mc"
+    alias rrmca="blessh rr mycase@shared.rr.mycased.com"
     # Elasticsearch
     alias ski="docker container start kibana"
     alias stki="docker container stop kibana"
