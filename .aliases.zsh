@@ -135,6 +135,7 @@ function set_aliases() {
     alias gaatcanrc="gaat; gcan; grc"
     alias gaatcanpf="gaat; gcan; gpf"
     alias gaatcanrcpf="gaat; gcan; grc; gpf"
+    alias gcanpf="gcan; gpf"
     alias gcp="git cherry-pick"
     alias gch="git checkout"
     alias gchb="git checkout -b"
