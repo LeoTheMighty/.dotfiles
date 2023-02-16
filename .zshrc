@@ -145,3 +145,9 @@ export PATH="$HOME/.rbenv/bin:$PATH"
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 export PATH="$HOME/.rbenv/bin:$PATH"
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/leo.belyi/mycase/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/leo.belyi/mycase/google-cloud-sdk/path.zsh.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/leo.belyi/mycase/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/leo.belyi/mycase/google-cloud-sdk/completion.zsh.inc'; fi
