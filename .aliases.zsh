@@ -83,6 +83,7 @@ function set_aliases() {
     alias reinstall_puma="puma-dev -uninstall; puma-dev -install"
     alias gr="git rebase --autosquash"
     alias gri="gr -i"
+    alias gras="gr --autostash"
     alias grias="gri --autostash"
     # alias gria="git rebase -i --autosquash"
     alias griod="gri origin/develop"
@@ -247,6 +248,21 @@ function fixup() {
     then
         gcf "$1"
         grias "$1"^
+    fi
+}
+function fxup() {
+    if [ "$1" != "" ] # or better, if [ -n "$1" ]
+    then
+        gcf "$1"
+        gras "$1"^
+    fi
+}
+function fxupf() {
+    if [ "$1" != "" ] # or better, if [ -n "$1" ]
+    then
+        gcf "$1"
+        gras "$1"^
+        gpf
     fi
 }
 function gafixup() {
