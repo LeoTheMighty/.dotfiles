@@ -174,6 +174,15 @@ function set_aliases() {
     alias pmca2="blessh dev mycase@prod3console2.prod.mc"
     alias rrmca="blessh rr mycase@shared.rr.mycased.com"
     alias leomca="blessh rr mycase@leo.rr.mycased.com"
+    # MyCase DIRECT Console Access
+    alias kssh="ssh mycase@stag3console1.stag.mc"
+    alias kssh2="ssh mycase@stag3console2.stag.mc"
+    alias kssh="ssh mycase@stag7console1.stag.mc"
+    alias kssh2="ssh mycase@stag7console2.stag.mc"
+    alias pssh="ssh mycase@prod3console1.prod.mc"
+    alias pssh2="ssh mycase@prod3console2.prod.mc"
+    alias rrssh="ssh mycase@shared.rr.mycased.com"
+    alias leossh="ssh mycase@leo.rr.mycased.com"
     # Elasticsearch
     alias ski="docker container start kibana"
     alias stki="docker container stop kibana"
