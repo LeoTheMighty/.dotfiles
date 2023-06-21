@@ -2,9 +2,7 @@
 Brewfile.lock.json
 **/*bak
 
-vendor/cache/*
-Gemfile
-Gemfile.lock
+# vendor/cache/*
 
 # my own stuff 
 tmp.txt
