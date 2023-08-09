@@ -168,8 +168,8 @@ function set_aliases() {
     # MyCase Console Access
     alias kmca="blessh dev mycase@stag3console1.stag.mc"
     alias kmca2="blessh dev mycase@stag3console2.stag.mc"
-    alias kmcl="blesssh dev mycase@stag7console1.stag.mc"
-    alias kmcl2="blesssh dev mycase@stag7console2.stag.mc"
+    alias kmcl="blessh dev mycase@stag7console1.stag.mc"
+    alias kmcl2="blessh dev mycase@stag7console2.stag.mc"
     alias pmca="blessh prodconsole mycase@prod3console1.prod.mc"
     alias pmca2="blessh prodconsole mycase@prod3console2.prod.mc"
     alias rrmca="blessh rr mycase@shared.rr.mycased.com"
