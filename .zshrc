@@ -2,6 +2,8 @@ source ~/.aliases.zsh
 
 run_in_rc_file
 
+export JAVA_HOME="/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home/jre"
+
 export PATH="/opt/homebrew/bin:$PATH"
 export PATH="/opt/homebrew/sbin:$PATH"
 export PATH="$HOME/.rbenv/bin:$PATH"
@@ -20,6 +22,7 @@ eval "$(pyenv init -)"
 if command -v pyenv 1>/dev/null 2>&1; then
 eval "$(pyenv init -)"
 fi
+alias pip="pip3"
 
 export CLICOLOR=1
 
