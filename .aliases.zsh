@@ -312,14 +312,15 @@ function gpfchain() {
     # gch $bn; gpf; gch $1
 # }
 function kafka() {
-    dir="/Users/leo.belyi/mycase/kafka"
-    echo "Running Zookeeper in background (waiting 4 seconds to allow it to start)"
-    $dir/bin/zookeeper-server-start.sh $dir/config/zookeeper.properties &
-    zookeeperpid=$!
-    sleep 4
-    $dir/bin/kafka-server-start.sh $dir/config/kafka.dev.server.properties
+    docker-compose up -f "/Users/leo.belyi/mycase/kafka/docker-compose.yml"
+    # dir="/Users/leo.belyi/mycase/kafka"
+    # echo "Running Zookeeper in background (waiting 4 seconds to allow it to start)"
+    # $dir/bin/zookeeper-server-start.sh $dir/config/zookeeper.properties &
+    # zookeeperpid=$!
+    # sleep 4
+    # $dir/bin/kafka-server-start.sh $dir/config/kafka.dev.server.properties
     # Kill zookeeper once kafka stops
-    kill $zookeeperpid
+    # kill $zookeeperpid
 }
 function kafkapr() {
     dir="/Users/leo.belyi/mycase/kafka"
