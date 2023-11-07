@@ -312,7 +312,7 @@ function gpfchain() {
     # gch $bn; gpf; gch $1
 # }
 function kafka() {
-    docker-compose up -f "/Users/leo.belyi/mycase/kafka/docker-compose.yml"
+    docker-compose -f "/Users/leo.belyi/mycase/kafka/docker-compose.yml" up
     # dir="/Users/leo.belyi/mycase/kafka"
     # echo "Running Zookeeper in background (waiting 4 seconds to allow it to start)"
     # $dir/bin/zookeeper-server-start.sh $dir/config/zookeeper.properties &
