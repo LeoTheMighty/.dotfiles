@@ -164,6 +164,7 @@ function set_aliases() {
     alias fs="foreman start"
     alias bfs="build; fs"
     alias puma_logs="tail -n 100 -f ~/Library/Logs/puma-dev.log"
+    alias sso="aws sso login --profile mycase-sso"
     # alias grdf="git range-diff"
     # MyCase Console Access
     alias kmca="blessh dev mycase@stag3console1.stag.mc"
