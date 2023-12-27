@@ -1,6 +1,7 @@
 .idea
 Brewfile.lock.json
 **/*bak
+**/.DS_Store
 
 # vendor/cache/*
 
