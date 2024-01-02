@@ -162,9 +162,10 @@ function set_aliases() {
     alias gbhis="git reflog | egrep -io \"moving from ([^[:space:]]+)\" | awk '{ print $3 }' | awk ' !x[$0]++' | egrep -v '^[a-f0-9]{40}$' | head -n10"
     # Non-git
     alias fs="foreman start"
-    alias bfs="sso; build; fs"
     alias puma_logs="tail -n 100 -f ~/Library/Logs/puma-dev.log"
     alias sso="aws sso login --profile mycase-sso"
+    alias has-sso="aws sts get-caller-identity --profile mycase-sso > /dev/null 2>&1"
+    alias bfs="has-sso || sso; build; fs"
     # alias grdf="git range-diff"
     # MyCase Console Access
     alias kmca="blessh dev mycase@stag3console1.stag.mc"
