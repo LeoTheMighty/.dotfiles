@@ -69,6 +69,7 @@ function set_aliases() {
     alias jt='pls test'
     alias debug='bundle exec pry-remote'
     alias dev_logs='tail -f log/development.log'
+    alias worker_logs='tail -f log/worker.log'
     alias bullet_logs='tail -f log/bullet.log'
     alias gl="git log --graph --decorate --pretty=oneline --abbrev-commit"
     alias gcu="git reset HEAD^"
