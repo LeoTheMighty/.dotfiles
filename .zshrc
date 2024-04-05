@@ -144,3 +144,6 @@ if [ -f '/Users/leo.belyi/mycase/google-cloud-sdk/path.zsh.inc' ]; then . '/User
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/leo.belyi/mycase/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/leo.belyi/mycase/google-cloud-sdk/completion.zsh.inc'; fi
+
+# Created by `pipx` on 2024-04-02 20:41:51
+export PATH="$PATH:/Users/leo.belyi/.local/bin"
