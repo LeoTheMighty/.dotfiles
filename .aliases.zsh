@@ -68,6 +68,7 @@ function set_aliases() {
     alias brt='CHROME_DEBUG=1 bundle exec ruby -Itest'
     alias jt='pls test'
     alias debug='bundle exec pry-remote'
+    alias debugw='bundle exec pry-remote -w'
     alias dev_logs='tail -f log/development.log'
     alias worker_logs='tail -f log/worker.log'
     alias bullet_logs='tail -f log/bullet.log'
