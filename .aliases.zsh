@@ -51,6 +51,29 @@ $diff
     echo "Git Range-diff copied to clipboard!!"
 }
 
+SSH_ENV="$HOME/.ssh/agent-environment"
+
+function start_agent {
+    echo "Initialising new SSH agent..."
+    /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
+    echo succeeded
+    chmod 600 "${SSH_ENV}"
+    . "${SSH_ENV}" > /dev/null
+    /usr/bin/ssh-add;
+}
+
+# Source SSH settings, if applicable
+
+if [ -f "${SSH_ENV}" ]; then
+    . "${SSH_ENV}" > /dev/null
+    #ps ${SSH_AGENT_PID} doesn't work under cywgin
+    ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
+        start_agent;
+    }
+else
+    start_agent;
+fi
+
 function set_aliases() {
     # global
     alias kapow='puma-dev -stop && echo -e "\033[32mRestarted puma-dev.\033[0m"'
@@ -68,9 +91,7 @@ function set_aliases() {
     alias brt='CHROME_DEBUG=1 bundle exec ruby -Itest'
     alias jt='pls test'
     alias debug='bundle exec pry-remote'
-    alias debugw='bundle exec pry-remote -w'
     alias dev_logs='tail -f log/development.log'
-    alias worker_logs='tail -f log/worker.log'
     alias bullet_logs='tail -f log/bullet.log'
     alias gl="git log --graph --decorate --pretty=oneline --abbrev-commit"
     alias gcu="git reset HEAD^"
@@ -85,7 +106,6 @@ function set_aliases() {
     alias reinstall_puma="puma-dev -uninstall; puma-dev -install"
     alias gr="git rebase --autosquash"
     alias gri="gr -i"
-    alias gras="git rebase --autosquash --autostash"
     alias grias="gri --autostash"
     # alias gria="git rebase -i --autosquash"
     alias griod="gri origin/develop"
@@ -138,7 +158,6 @@ function set_aliases() {
     alias gaatcanrc="gaat; gcan; grc"
     alias gaatcanpf="gaat; gcan; gpf"
     alias gaatcanrcpf="gaat; gcan; grc; gpf"
-    alias gcanpf="gcan; gpf"
     alias gcp="git cherry-pick"
     alias gch="git checkout"
     alias gchb="git checkout -b"
@@ -163,34 +182,17 @@ function set_aliases() {
     # alias gcl="git clean -df"
     alias gbhis="git reflog | egrep -io \"moving from ([^[:space:]]+)\" | awk '{ print $3 }' | awk ' !x[$0]++' | egrep -v '^[a-f0-9]{40}$' | head -n10"
     # Non-git
-    alias fs="foreman start -f Procfile.local"
+    alias fs="foreman start"
+    alias bfs="build; fs"
     alias puma_logs="tail -n 100 -f ~/Library/Logs/puma-dev.log"
-    alias sso="aws sso login --profile mycase-sso"
-    alias has-sso="aws sts get-caller-identity --profile mycase-sso > /dev/null 2>&1"
-    alias bfs="has-sso || sso; build; fs"
     # alias grdf="git range-diff"
     # MyCase Console Access
     alias kmca="blessh dev mycase@stag3console1.stag.mc"
     alias kmca2="blessh dev mycase@stag3console2.stag.mc"
-    alias smca="blessh dev mycase@stag23console1.stag.mc"
-    alias smca2="blessh dev mycase@stag23console2.stag.mc"
-    alias kmcl="blessh dev mycase@stag7console1.stag.mc"
-    alias kmcl2="blessh dev mycase@stag7console2.stag.mc"
-    alias pmca="ec2-connect prod-ec2-access-role-sso prod3console"
-    alias rrmca="blessh rr mycase@shared.rr.mycased.com"
-    alias leomca="blessh rr mycase@leo.rr.mycased.com"
-    # MyCase DIRECT Console Access
-    alias bdev="blessh dev"
-    alias brr="blessh rr"
-    alias bprod="blessh prodconsole"
-    alias kssh="ssh mycase@stag3console1.stag.mc"
-    alias kssh2="ssh mycase@stag3console2.stag.mc"
-    alias kssh="ssh mycase@stag7console1.stag.mc"
-    alias kssh2="ssh mycase@stag7console2.stag.mc"
-    alias pssh="ssh mycase@prod3console1.prod.mc"
-    alias pssh2="ssh mycase@prod3console2.prod.mc"
-    alias rrssh="ssh mycase@shared.rr.mycased.com"
-    alias leossh="ssh mycase@leo.rr.mycased.com"
+    alias kmcl="blesssh dev mycase@stag7console1.stag.mc"
+    alias kmcl2="blesssh dev mycase@stag7console2.stag.mc"
+    alias pmca="blessh dev mycase@prod3console1.prod.mc"
+    alias pmca2="blessh dev mycase@prod3console2.prod.mc"
     # Elasticsearch
     alias ski="docker container start kibana"
     alias stki="docker container stop kibana"
@@ -212,6 +214,13 @@ function set_aliases() {
     alias yt="yarn test"
     alias ye="yarn eject"
     alias yarnd="yarn dev"
+    # Cargo Usage
+    alias cb="cargo build"
+    alias cr="cargo run"
+    alias cc="cargo clippy"
+    alias cca="cargo clippy -- -W clippy::all -D warnings"
+    alias ccb="cc && cb"
+    alias ccab="ccb && cb"
     # github pages
     alias ds="gp; yd"
     # for updating aliases specifically
@@ -268,21 +277,6 @@ function fixup() {
         grias "$1"^
     fi
 }
-function fxup() {
-    if [ "$1" != "" ] # or better, if [ -n "$1" ]
-    then
-        gcf "$1"
-        gras "$1"^
-    fi
-}
-function fxupf() {
-    if [ "$1" != "" ] # or better, if [ -n "$1" ]
-    then
-        gcf "$1"
-        gras "$1"^
-        gpf
-    fi
-}
 function gafixup() {
     ga $1
     if [ "$2" != "" ]
@@ -317,15 +311,14 @@ function gpfchain() {
     # gch $bn; gpf; gch $1
 # }
 function kafka() {
-    docker-compose -f "/Users/leo.belyi/mycase/kafka/docker-compose.yml" up
-    # dir="/Users/leo.belyi/mycase/kafka"
-    # echo "Running Zookeeper in background (waiting 4 seconds to allow it to start)"
-    # $dir/bin/zookeeper-server-start.sh $dir/config/zookeeper.properties &
-    # zookeeperpid=$!
-    # sleep 4
-    # $dir/bin/kafka-server-start.sh $dir/config/kafka.dev.server.properties
+    dir="/Users/leo.belyi/mycase/kafka"
+    echo "Running Zookeeper in background (waiting 4 seconds to allow it to start)"
+    $dir/bin/zookeeper-server-start.sh $dir/config/zookeeper.properties &
+    zookeeperpid=$!
+    sleep 4
+    $dir/bin/kafka-server-start.sh $dir/config/kafka.dev.server.properties
     # Kill zookeeper once kafka stops
-    # kill $zookeeperpid
+    kill $zookeeperpid
 }
 function kafkapr() {
     dir="/Users/leo.belyi/mycase/kafka"
