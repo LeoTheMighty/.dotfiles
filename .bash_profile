@@ -2,8 +2,6 @@ export PATH="$HOME/.rbenv/bin:$PATH"
 export PATH="/opt/homebrew/opt/mysql@5.7/bin:$PATH"
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 
-unset RBENV_VERSION
-
 SSH_ENV="$HOME/.ssh/agent-environment"
 
 function start_agent {
@@ -51,3 +49,8 @@ export PATH="$HOME/.rbenv/bin:$PATH"
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 export PATH="$HOME/.rbenv/bin:$PATH"
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+
+autoload bashcompinit
+bashcompinit
+
+complete -C /opt/homebrew/bin/terraform terraform
