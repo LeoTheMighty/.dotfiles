@@ -2,8 +2,7 @@ source ~/.aliases.zsh
 
 run_in_rc_file
 
-export JAVA_HOME="/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home/jre"
-
+export PATH="/Users/leonidbelyi/personal/flutter/bin:$PATH"
 export PATH="/opt/homebrew/bin:$PATH"
 export PATH="/opt/homebrew/sbin:$PATH"
 export PATH="$HOME/.rbenv/bin:$PATH"
@@ -22,7 +21,6 @@ eval "$(pyenv init -)"
 if command -v pyenv 1>/dev/null 2>&1; then
 eval "$(pyenv init -)"
 fi
-alias pip="pip3"
 
 export CLICOLOR=1
 
@@ -30,7 +28,7 @@ source ~/.bash_profile
 
 [ -f $(brew --prefix)/etc/profile.d/autojump.sh ] && . $(brew --prefix)/etc/profile.d/autojump.sh
 
-eval "$(starship init zsh)"
+# eval "$(starship init zsh)"
 
 # fish
 
@@ -108,7 +106,10 @@ ZSH_THEME="cobalt2"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(autojump zsh-syntax-highlighting)
 
-source $ZSH/oh-my-zsh.sh
+if [ -e "$ZSH/oh-my-zsh.sh" ]
+then
+    source $ZSH/oh-my-zsh.sh
+fi
 
 # User configuration
 
@@ -135,15 +136,20 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
 export PATH="$HOME/.rbenv/bin:$PATH"
 if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+export PATH="$HOME/.rbenv/bin:$PATH"
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+export PATH="$HOME/.rbenv/bin:$PATH"
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+export PATH="$HOME/.rbenv/bin:$PATH"
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+export PATH="$HOME/.rbenv/bin:$PATH"
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+export PATH="$HOME/.rbenv/bin:$PATH"
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/leo.belyi/mycase/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/leo.belyi/mycase/google-cloud-sdk/path.zsh.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '/Users/leo.belyi/mycase/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/leo.belyi/mycase/google-cloud-sdk/completion.zsh.inc'; fi
-
-# Created by `pipx` on 2024-04-02 20:41:51
-export PATH="$PATH:/Users/leo.belyi/.local/bin"
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C /opt/homebrew/bin/terraform terraform
