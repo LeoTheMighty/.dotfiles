@@ -218,7 +218,7 @@ function set_aliases() {
     alias cb="cargo build"
     alias cr="cargo run"
     alias cc="cargo clippy"
-    alias cca="cargo clippy -- -W clippy::all -D warnings"
+    alias cca="cargo clippy --all-targets --all-features -- -W clippy::all -W clippy::pedantic -W clippy::nursery -D warnings --deny clippy::complexity --deny clippy::correctness --deny clippy::style --deny clippy::perf --deny clippy::cargo --deny clippy::pedantic --deny clippy::nursery"
     alias ccb="cc && cb"
     alias ccab="cca && cb"
     # github pages
