@@ -220,7 +220,7 @@ function set_aliases() {
     alias cc="cargo clippy"
     alias cca="cargo clippy -- -W clippy::all -D warnings"
     alias ccb="cc && cb"
-    alias ccab="ccb && cb"
+    alias ccab="cca && cb"
     # github pages
     alias ds="gp; yd"
     # for updating aliases specifically
