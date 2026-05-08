@@ -11,3 +11,8 @@ tmp.txt
 /run_docker.sh
 /run_fargate.sh
 
+# BMAD Project Config
+/_bmad
+/.claude/commands/bmad*
+/.claude/worktrees/
+

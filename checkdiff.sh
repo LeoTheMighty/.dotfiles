@@ -8,7 +8,8 @@ for file in .*;
 do
     if [ "$file" != ".git" ] && [ "$file" != ".gitignore" ]; then
         diff -q "$file" "../$file"
-        if [[ "$status" == "1" ]]; then
+        # Same $status zsh bug as update.sh — read $? instead.
+        if [[ "$?" == "1" ]]; then
             diff "$file" "../$file"
             exit_code=1
             break
