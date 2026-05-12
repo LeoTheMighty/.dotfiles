@@ -1,55 +1,6 @@
 alias ch="git rev-parse HEAD --short"
 alias bn="git rev-parse --abbrev-ref HEAD"
 alias pb="git rev-parse --abbrev-ref @{-1}"
-# brew list aha || brew install aha
-alias grd="git range-diff"
-function grdf_print() {
-    diff=$(grd $1...$2)
-    echo "<details>
-    <summary>ForcePushRangeDiff</summary>
-
-\`\`\`diff
-
-$diff
-
-\`\`\`
-
-</details>
-
-" >| tmp.txt
-    sed -i '' '/^\ -:/d' tmp.txt
-    sed -i '' 's/ //' tmp.txt
-    sed -i '' 's/ //' tmp.txt
-    sed -i '' 's/ //' tmp.txt
-    sed -i '' 's/ //' tmp.txt
-    cat tmp.txt | pbcopy
-    rm tmp.txt
-    echo "Git Range-diff copied to clipboard!!"
-}
-function grdf() {
-    bn=$(git rev-parse --abbrev-ref HEAD)
-    diff=$(git range-diff origin/$bn...$bn)
-    echo "
-
-<details><summary>ForcePushRangeDiff</summary>
-
-\`\`\`diff
-
-$diff
-
-\`\`\`
-
-</details>
-" >| tmp.txt
-    sed -i '' 's/ //' tmp.txt
-    sed -i '' 's/ //' tmp.txt
-    sed -i '' 's/ //' tmp.txt
-    sed -i '' 's/ //' tmp.txt
-    sed -i '' '/^\ -:/d' tmp.txt
-    cat tmp.txt | pbcopy
-    rm tmp.txt
-    echo "Git Range-diff copied to clipboard!!"
-}
 
 function set_aliases() {
     # global
@@ -93,7 +44,7 @@ function set_aliases() {
     # alias griad="gria origin/develop"
     alias gpl="git pull"
     alias gp="git push"
-    alias gpf="grdf; gp --force-with-lease"
+    alias gpf="gp --force-with-lease"
     alias gro="gri --onto"
     alias gron="gr --onto"
     alias groas="grias --onto"
@@ -145,7 +96,6 @@ function set_aliases() {
     alias gch="git checkout"
     alias gchb="git checkout -b"
     alias gchd="gch develop"
-    alias gpf="grdf; gp --force-with-lease"
     alias gpfo="gpf origin"
     alias gst="git stash"
     alias gstp="git stash pop"
@@ -172,7 +122,6 @@ function set_aliases() {
     alias sso="aws sso login --profile dev-role-sso"
     alias has-sso="aws sts get-caller-identity --profile dev-role-sso > /dev/null 2>&1"
     alias bfs="has-sso || sso; build; fs"
-    # alias grdf="git range-diff"
     # MyCase Console Access
     alias kmca="ec2-connect stag-ec2-console-sso stag3console"
     alias kmca2="blessh dev mycase@stag3console2.stag.mc"
