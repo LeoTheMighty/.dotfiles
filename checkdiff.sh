@@ -4,9 +4,14 @@ realpath () {
 cd "$(dirname "$(realpath "$0")")"; # cd into script directory
 
 # Keep in sync with update.sh
-tracked_subdirs=(
+tracked_paths=(
     ".claude/commands"
     ".claude/hooks"
+    ".oh-my-zsh/custom/themes/cobalt2.zsh-theme"
+    ".config/starship.toml"
+    ".config/git/ignore"
+    ".config/gh/config.yml"
+    ".ssh/config"
 )
 skip_sync=(
     ".gitconfig"
@@ -42,12 +47,16 @@ do
 done
 
 if [[ "$exit_code" == "0" ]]; then
-    for sub in "${tracked_subdirs[@]}"; do
-        [ -d "$sub" ] || continue
-        for f in "$sub"/*; do
-            [ -f "$f" ] || continue
-            check_file "$f" || break 2
-        done
+    # NB: do not name the loop var `path` — see comment in update.sh.
+    for tracked in "${tracked_paths[@]}"; do
+        if [ -d "$tracked" ]; then
+            for f in "$tracked"/*; do
+                [ -f "$f" ] || continue
+                check_file "$f" || break 2
+            done
+        elif [ -f "$tracked" ]; then
+            check_file "$tracked" || break
+        fi
     done
 fi
 
