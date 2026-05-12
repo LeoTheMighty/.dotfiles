@@ -1,0 +1,59 @@
+# Condensed single-line prompt
+add_newline = false
+
+format = """
+$directory\
+$git_branch\
+$git_status\
+$nodejs\
+$python\
+$ruby\
+$character"""
+
+[directory]
+truncation_length = 2
+truncate_to_repo = true
+style = "bold cyan"
+format = "[$path]($style) "
+
+[git_branch]
+symbol = " "
+style = "purple"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "yellow"
+format = "[$all_status$ahead_behind]($style) "
+conflicted = "="
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+untracked = "?"
+stashed = "$"
+modified = "!"
+staged = "+"
+renamed = "»"
+deleted = "✘"
+
+[nodejs]
+symbol = " "
+format = "[$symbol($version )]($style)"
+style = "green"
+detect_files = ["package.json", ".nvmrc"]
+
+[python]
+symbol = " "
+format = "[$symbol($version )]($style)"
+style = "yellow"
+
+[ruby]
+symbol = " "
+format = "[$symbol($version )]($style)"
+style = "red"
+
+[package]
+disabled = true
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"

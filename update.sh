@@ -2,13 +2,22 @@ editcommit=$1
 
 dir="$HOME/.dotfiles"
 
-# Subdirectory paths (relative to $dir / $HOME) whose files are tracked
-# individually. Top-level dotfiles are still globbed; this list is for
-# nested locations where a glob would be too coarse.
-tracked_subdirs=(
+# Nested paths (relative to $dir / $HOME) to mirror. Each entry is
+# either a directory (every file inside it is synced — non-recursive)
+# or a single file path. Top-level dotfiles are still globbed; this
+# list covers nested locations the top-level glob misses.
+tracked_paths=(
     ".claude/commands"
     ".claude/hooks"
+    ".oh-my-zsh/custom/themes/cobalt2.zsh-theme"
+    ".config/starship.toml"
+    ".config/git/ignore"
+    ".config/gh/config.yml"
+    ".ssh/config"
 )
+# Note: Brewfile lives at repo root but isn't in tracked_paths — it's a
+# one-way artifact, regenerate with `brew bundle dump --force` from
+# inside ~/.dotfiles when you want to refresh, then commit.
 
 # Files that exist in the repo with secrets redacted (e.g. PATs replaced
 # by <REPLACE_WITH_NEW_GITHUB_PAT>). The local ~/ version has the real
@@ -25,7 +34,10 @@ cd $dir
 # Sync a single tracked file (path is relative to $dir and $HOME).
 sync_file() {
     local relpath="$1"
-    local local="$HOME/$relpath"
+    # NB: variable was previously named `local`, which shadowed the zsh
+    # `local` keyword and silently broke this function for any relpath
+    # containing a slash (i.e. all nested files). Don't rename back.
+    local home_file="$HOME/$relpath"
     local repo="$dir/$relpath"
     local backup="$dir/backup/$relpath"
 
@@ -35,14 +47,14 @@ sync_file() {
         fi
     done
 
-    if [ ! -e "$local" ]; then
+    if [ ! -e "$home_file" ]; then
         echo "Skipping $relpath: missing in ~/"
         return
     fi
 
     git diff -s --exit-code "$repo"
     local gitdiff="$?"
-    diff -q "$local" "$repo"
+    diff -q "$home_file" "$repo"
     # `localdiff="$status"` was a long-standing bug under zsh: $status
     # is a read-only special parameter (mirrors $?) that can't be
     # assigned to, so this assignment silently failed and localdiff was
@@ -53,26 +65,26 @@ sync_file() {
     if [[ "$localdiff" == "1" ]]; then
         if [[ "$gitdiff" == "1" ]]; then
             mkdir -p "$(dirname "$backup")"
-            cp "$local" "$backup"
+            cp "$home_file" "$backup"
             local tmp="$dir/tmp"
             cp "$repo" "$tmp"
-            cp "$local" "$repo"
+            cp "$home_file" "$repo"
             git diff -s --exit-code "$repo"
             local localtogitdiff="$?"
-            echo "Updating $local from $repo:"
+            echo "Updating $home_file from $repo:"
             cp "$tmp" "$repo"
             rm "$tmp"
-            cp "$repo" "$local"
+            cp "$repo" "$home_file"
             if [[ "$localtogitdiff" == "1" ]]; then
                 echo "!!!CHANGES IN BOTH REPO AND LOCAL!!!"
                 echo "This probably means you updated both files."
                 echo "Check the local backup in $backup"
-                echo "The version in $repo was saved to $local"
+                echo "The version in $repo was saved to $home_file"
             fi
             place="repo"
         else
-            echo "Updating $local from $repo"
-            cp "$local" "$repo"
+            echo "Updating $home_file from $repo"
+            cp "$home_file" "$repo"
             place="local"
         fi
     fi
@@ -100,13 +112,21 @@ do
     fi
 done
 
-# Tracked subdirs (file-by-file mirror)
-for sub in "${tracked_subdirs[@]}"; do
-    [ -d "$dir/$sub" ] || continue
-    for f in "$dir/$sub"/*; do
-        [ -f "$f" ] || continue
-        sync_file "${f#$dir/}"
-    done
+# Tracked nested paths — directory entries are walked (non-recursive),
+# file entries are synced directly.
+# NB: do not name the loop var `path` — in zsh, $path is a special
+# array tied to $PATH, and assigning to it wipes the executable search
+# path mid-loop, causing later `git`/`diff` calls to fail with
+# "command not found".
+for tracked in "${tracked_paths[@]}"; do
+    if [ -d "$dir/$tracked" ]; then
+        for f in "$dir/$tracked"/*; do
+            [ -f "$f" ] || continue
+            sync_file "${f#$dir/}"
+        done
+    elif [ -f "$dir/$tracked" ]; then
+        sync_file "$tracked"
+    fi
 done
 
 cd ~-

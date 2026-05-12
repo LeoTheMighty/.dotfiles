@@ -23,10 +23,20 @@ Then, if you do it manually, just use `updatedf` in order to update it at your l
 ## Customizing it
 Basically whatever files are currently inside the repo, it will try to match that to the local versions outside of the repo, so if you want to fork this repo and make it your own, you would basically first copy all your dotfiles that you want to keep track of onto the repo, and then run the `updatedf` function and it should handle it.
 
-## Tracked subdirs
-In addition to top-level dotfiles, `update.sh` also mirrors a few nested locations file-by-file. Add new ones to the `tracked_subdirs` array at the top of `update.sh` (and `checkdiff.sh`). Currently:
+## Tracked nested paths
+In addition to top-level dotfiles, `update.sh` mirrors a list of nested paths. Each entry in the `tracked_paths` array (top of `update.sh` and `checkdiff.sh`) is either a directory (every file inside is mirrored, non-recursively) or a single file path. Currently:
 * `.claude/commands/` — custom Claude Code slash commands
 * `.claude/hooks/` — Claude Code hooks
+* `.oh-my-zsh/custom/themes/cobalt2.zsh-theme` — custom zsh theme
+* `.config/starship.toml` — starship prompt config
+* `.config/git/ignore` — global gitignore
+* `.config/gh/config.yml` — gh CLI prefs (NB: `hosts.yml` next to it holds auth — never track)
+* `.ssh/config` — ssh routing config (no keys)
+
+`Brewfile` also lives at repo root but is NOT in `tracked_paths` — it's a one-way artifact. Regenerate with `brew bundle dump --force` from inside `~/.dotfiles` when you want to refresh, then commit manually.
+
+## Files redacted in repo, skipped from sync
+`.gitconfig`, `.npmrc`, `.gemrc` are stored in the repo with PATs replaced by `<REPLACE_WITH_NEW_GITHUB_PAT>`. The `skip_sync` array in the scripts keeps `udf` from overwriting the redacted versions with real secrets from `~/`. On a fresh machine: clone, then manually substitute your real PAT into those three files.
 
 ## Ideas
 * Use `git check-ignore` to see what's ignored and don't parse it?
