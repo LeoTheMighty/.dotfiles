@@ -18,7 +18,11 @@ do
         git diff -s --exit-code $repo
         gitdiff="$?"
         diff -q $local $repo
-        localdiff="$status"
+        # `localdiff="$status"` was a long-standing bug under zsh: $status
+        # is a read-only special parameter (mirrors $?) that can't be
+        # assigned to, so this assignment silently failed and localdiff was
+        # always empty, making the "local differs" branches dead code.
+        localdiff="$?"
         backup="$dir/backup/$file"
         if [[ "$localdiff" == "1" ]]; then
             if [[ "$gitdiff" == "1" ]]; then
