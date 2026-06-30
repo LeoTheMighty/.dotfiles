@@ -81,3 +81,6 @@ fi
 
 # --- aliases & functions ---
 [ -f "$HOME/.aliases.zsh" ] && source "$HOME/.aliases.zsh"
+
+# Added by mycase_hal/scripts/setup_compose_env.sh
+eval "$(direnv hook zsh)"
