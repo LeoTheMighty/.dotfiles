@@ -161,9 +161,64 @@ If `/push-story` was called with no positional summary words (i.e., the user ran
 
 ---
 
-## Phase 3: Create the branch
+## Phase 2.5: Detect existing work-in-progress
 
-Compute branch name: `lor-<NNNN>-<kebab-summary>` (max 60 chars). Lowercase, replace non-alphanumerics with `-`, collapse repeats, strip trailing `-`. Matches the existing convention (`lor-2348-cherry-pick`).
+Before deciding whether to branch, check whether work is already underway for this ticket. The goal: never create a duplicate branch or PR, and **never delete a PR** just because its branch name doesn't fit the schema. The schema (`lor-<NNNN>-<kebab-summary>`) is a default for *new* branches, not a constraint to enforce retroactively on existing work.
+
+Initialize: `$EXISTING_PR=false`, `$WORKING_BRANCH=null`.
+
+### 2.5a: Is there an open PR for the current branch?
+
+```bash
+gh pr view --json url,number,title,body,headRefName,baseRefName,state 2>/dev/null
+```
+
+If a PR exists AND `state == "OPEN"` AND `headRefName == $STARTING_BRANCH`:
+- Set `$EXISTING_PR=true`, capture `$EXISTING_PR_URL`, `$EXISTING_PR_NUMBER`, `$EXISTING_PR_BODY`, `$EXISTING_PR_TITLE`.
+- Set `$WORKING_BRANCH=$STARTING_BRANCH` (we stay on it as-is).
+- Log: `"Found open PR #<n> on current branch '<name>' — entering update mode (branch name preserved as-is)."`
+- Skip Phase 3 entirely.
+
+### 2.5b: Does a branch already exist for this ticket (without an open PR yet)?
+
+If 2.5a didn't fire, search local + remote for any branch referencing `$TICKET_KEY`:
+
+```bash
+git for-each-ref --format='%(refname:short)' 'refs/heads/**' | grep -iE "lor[-_]?$TICKET_NUM\b"
+git ls-remote --heads origin | awk '{print $2}' | sed 's@refs/heads/@@' | grep -iE "lor[-_]?$TICKET_NUM\b"
+```
+
+(`$TICKET_NUM` is the numeric portion of `$TICKET_KEY`.)
+
+If one or more matches are found:
+- Show the list, default to the first.
+- Ask: `"Found existing branch '<name>' for $TICKET_KEY — switch to it instead of creating a new one? (Y/n)"` Default Y.
+- If yes:
+  - If `$HAS_CHANGES=true`, `git stash push -m "push-story: stash before switching to <name>"` first.
+  - `git checkout <name>` (or `git checkout -b <name> origin/<name>` if remote-only).
+  - Set `$WORKING_BRANCH=<name>`.
+  - If we stashed, `git stash pop`. On conflict, warn and **STOP**.
+  - Re-run 2.5a against the new current branch — if it has an open PR, flip `$EXISTING_PR=true` and capture it.
+  - Skip Phase 3.
+
+### 2.5c: Is the current branch the user's in-progress work?
+
+If 2.5a and 2.5b both came up empty but `$STARTING_BRANCH != $DEFAULT_BRANCH` and the user picked "branch off current branch" in Phase 0:
+- Ask: `"Use the current branch '<name>' for this work, or create a new one off it? (current/new)"`. Default: current.
+- If `current`: set `$WORKING_BRANCH=$STARTING_BRANCH`; skip Phase 3.
+- If `new`: fall through to Phase 3 as normal.
+
+### 2.5d: Otherwise
+
+Leave `$WORKING_BRANCH=null`; Phase 3 will create a new branch.
+
+---
+
+## Phase 3: Create the branch (skip if `$WORKING_BRANCH` already set)
+
+If `$WORKING_BRANCH` was set in Phase 2.5, skip this phase entirely.
+
+Otherwise, compute branch name: `lor-<NNNN>-<kebab-summary>` (max 60 chars). Lowercase, replace non-alphanumerics with `-`, collapse repeats, strip trailing `-`. Matches the existing convention (`lor-2348-cherry-pick`).
 
 The `<kebab-summary>` uses the **ticket's** summary (from `/create-story`'s output, or the existing ticket's summary fetched in 2b) — NOT the raw `$ARGUMENTS` string. This way the branch name stays in sync with whatever summary actually landed in JIRA.
 
@@ -178,41 +233,77 @@ The `<kebab-summary>` uses the **ticket's** summary (from `/create-story`'s outp
    git rev-parse --verify "refs/heads/<branch>" 2>/dev/null
    git ls-remote --heads origin "<branch>"
    ```
-3. If it exists, suffix `-2`, `-3`, etc. Confirm with the user before adopting a suffix.
+3. If it exists, this should be rare because Phase 2.5b already searched for ticket-matching branches. But if it does:
+   - First check whether that branch has an open PR (run the 2.5a check against it). If yes, prefer **switching to it** over suffixing — confirm with the user, then `git checkout <existing>`, set `$WORKING_BRANCH=<existing>`, set `$EXISTING_PR` accordingly, and skip the rest of this phase.
+   - Otherwise, suffix `-2`, `-3`, etc. Confirm with the user before adopting a suffix.
 4. Create and check out:
    ```bash
    git checkout -b <branch>
    ```
 5. If we stashed: `git stash pop`. On conflict, warn and **STOP** — let the user resolve.
+6. Set `$WORKING_BRANCH=<branch>`.
 
 If `$HAS_CHANGES=false`, this is the exit point per Phase 1.
 
 ---
 
-## Phase 4: Commit
+## Phase 4: Commit & push
 
-1. If nothing is staged, stage everything that isn't ignored:
-   ```bash
-   git add -A
-   ```
-   Then run `git status --porcelain` and **scan for sensitive paths** before committing: `.env`, `*.pem`, `id_rsa*`, `secrets/`, `*credentials*`, `*.key`. If anything matches, **STOP** and ask the user.
-2. Commit:
-   ```bash
-   git commit -m "$TICKET_KEY: <ticket summary>" -m "$(cat <<'EOF'
-   <2-3 line body derived from the diff and any extra context from $ARGUMENTS>
+In **update mode** (`$EXISTING_PR=true`): the branch may already have its own history. Don't try to consolidate. If `$HAS_CHANGES=true`, just add a new commit on top — never `--amend` someone else's commit, never force-push. If `$HAS_CHANGES=false`, skip the commit step but still push (in case the local branch is ahead of `origin`).
 
-   Jira: https://affinipay.atlassian.net/browse/$TICKET_KEY
-   EOF
-   )"
-   ```
-3. Push:
+1. If `$HAS_CHANGES=true`:
+   - If nothing is staged, stage everything that isn't ignored:
+     ```bash
+     git add -A
+     ```
+     Then run `git status --porcelain` and **scan for sensitive paths** before committing: `.env`, `*.pem`, `id_rsa*`, `secrets/`, `*credentials*`, `*.key`. If anything matches, **STOP** and ask the user.
+   - Commit:
+     ```bash
+     git commit -m "$TICKET_KEY: <ticket summary>" -m "$(cat <<'EOF'
+     <2-3 line body derived from the diff and any extra context from $ARGUMENTS>
+
+     Jira: https://affinipay.atlassian.net/browse/$TICKET_KEY
+     EOF
+     )"
+     ```
+2. Push:
    ```bash
    git push -u origin HEAD
    ```
+   In update mode, the upstream is likely already set — that's fine, `-u` is idempotent.
 
 ---
 
-## Phase 5: Create the PR
+## Phase 5: Create OR update the PR
+
+### Phase 5a: Update mode (`$EXISTING_PR=true`)
+
+Don't create a new PR. **Do not delete or recreate the existing PR under any circumstances** — even if the branch name doesn't match the schema, even if the title is "wrong." Just augment the body in place so the rest of the pipeline (`/update-qa-steps`, JIRA comment, transition) has the anchors it needs.
+
+1. Start from `$EXISTING_PR_BODY` (verbatim).
+2. Inject **only what's missing** — preserve everything else as-is, including the title:
+   - If the body contains no link to `https://affinipay.atlassian.net/browse/$TICKET_KEY` AND no `## Jira` heading, append:
+     ```
+     ## Jira
+     - $TICKET_KEY: https://affinipay.atlassian.net/browse/$TICKET_KEY
+     ```
+     Insert this **before** the Cursor summary block (`<!-- CURSOR_SUMMARY -->`) if present, else at the end of the body.
+   - If the body has no `## Acceptance Criteria` heading, append a placeholder section so `/update-qa-steps` has an anchor to replace:
+     ```
+     ## Acceptance Criteria
+     - [ ] (placeholder — will be filled by /update-qa-steps)
+     ```
+     Insert before the Cursor block if present, else after the new Jira block.
+3. Write the updated body to a tempfile and:
+   ```bash
+   gh pr edit $EXISTING_PR_NUMBER --body-file <tempfile>
+   ```
+4. Do **not** edit the PR title in update mode — the user owns it.
+5. Set `$PR_URL=$EXISTING_PR_URL`, `$PR_NUMBER=$EXISTING_PR_NUMBER`.
+
+Echo to the user: `"Update mode: kept existing PR #<n> ('<title>'), branch '<name>'. Added JIRA / AC anchors as needed."`
+
+### Phase 5b: Create mode (`$EXISTING_PR=false`)
 
 The PR body MUST include a `## Acceptance Criteria` section with at least one placeholder checkbox so `/update-qa-steps` (Phase 6) has a heading to anchor on when it replaces the section's contents.
 
@@ -235,7 +326,7 @@ EOF
 )"
 ```
 
-Capture the returned PR URL and PR number.
+Capture the returned PR URL and PR number into `$PR_URL` / `$PR_NUMBER`.
 
 ---
 
@@ -244,13 +335,13 @@ Capture the returned PR URL and PR number.
 Invoke:
 
 ```
-/update-qa-steps <PR_NUMBER>
+/update-qa-steps $PR_NUMBER
 ```
 
 That skill will:
 - Read the PR diff + JIRA ticket.
 - Generate non-technical, user-observable AC items (per the QA Style Guide in `_jira-helpers.md`).
-- Replace the contents of the `## Acceptance Criteria` section in the PR body with the new `- [ ]` checklist (matching the heading we wrote in Phase 5).
+- Replace the contents of the `## Acceptance Criteria` section in the PR body with the new `- [ ]` checklist (matching the heading we wrote in Phase 5 — either freshly created in 5b or seeded into the existing PR in 5a).
 - Sync the same section into the JIRA ticket description by replacing the contents of its `## Acceptance Criteria` section (the one `/create-story` seeded with a placeholder in its Phase 2).
 
 If `/update-qa-steps` fails partway through (e.g., the JIRA edit errored), it surfaces the manual recovery info and prints the AC block to the console. **Don't roll back** — the PR is open, the ticket exists, the work is real. Include the error and the printed AC block in the final summary so the user can paste manually.
@@ -287,16 +378,19 @@ Handle outcomes:
 ## Phase 9: Summary
 
 ```
-## /push-story complete
+## /push-story complete   <mode: created | updated>
 
 ### Branch
-<branch-name>  (pushed to origin)
+$WORKING_BRANCH  (pushed to origin)
+<if $WORKING_BRANCH was pre-existing, add: "(kept existing branch — does not match the lor-NNNN-kebab schema)" if applicable>
 
 ### Commit
 <sha>  $TICKET_KEY: <ticket summary>
+<or "no new commits" if $HAS_CHANGES was false in update mode>
 
 ### Pull Request
-<pr-url>
+$PR_URL
+<add "(existing — body augmented in place)" in update mode>
 
 ### JIRA Ticket
 $TICKET_KEY  <summary>  (status: <status>)
@@ -331,10 +425,12 @@ Restore the user to a sensible state:
 3. **Project guard.** Only LOR tickets. If passed a non-LOR key, refuse before touching the working tree.
 4. **Active-sprint scope.** New tickets land in the active sprint (delegated to `/create-story` — overridable via `--backlog`). Existing tickets get a warn-and-confirm if they're in a different sprint.
 5. **Search before create.** When no key is passed, run the JQL probe first. This avoids the user accidentally creating a duplicate of in-flight work.
-6. **`## Acceptance Criteria` is the contract on both surfaces.** The heading IS the idempotency anchor — no HTML comment markers. `/create-story` seeds it in the JIRA description; `/push-story` Phase 5 seeds it in the PR body; `/update-qa-steps` replaces both sets of contents in lockstep once the diff is real.
-7. **Flags are pass-through.** Don't try to interpret `--points`, `--priority`, etc. here — forward them to `/create-story` and let that skill handle validation. The flags `/push-story` consumes itself are `--dry-run` (stops the chain after Phase 2d) and `--no-transition` (skips Phase 8).
-8. **Never auto-stage sensitive files.** The Phase 4 scan is non-negotiable.
-9. **Branch name uses the ticket's summary, not `$ARGUMENTS`.** This keeps the branch in sync with whatever summary actually landed in JIRA (especially relevant when `/create-story` modified the user's input or when an existing ticket has a different summary than the extra context passed).
-10. **Fail-soft after PR creation.** Once the GitHub PR is open, every JIRA error (AC sync, PR comment, transitions) is non-fatal — print manual recovery info, don't roll back.
-11. **Surface `/create-story` Notes.** If `/create-story` had to drop the sprint, skip the parent, fall back on priority, etc., echo those notes in Phase 9 so the user isn't surprised by the ticket's final state.
-12. **The skill is iterable.** As `/create-story`'s heuristics and `/update-qa-steps`'s AC style improve, this skill stays lean. Resist the urge to inline logic from either delegate.
+6. **Never delete or recreate an existing PR.** If `/push-story` is run on a branch with an open PR, Phase 5a is the only path — augment the body in place. The schema (`lor-NNNN-kebab`) is a default for *new* branches, not a constraint to enforce on existing work. Closing a PR to "rename" it would lose review history, inline threads, and CI state.
+7. **Keep existing branches as-is.** Phase 2.5 always runs first. If a branch already exists for this ticket (open PR on the current branch, or another branch matching `lor-<NNNN>`), use it verbatim — don't rename, don't recreate, don't suffix. The branch-naming schema only applies when we're creating a fresh branch in Phase 3.
+8. **`## Acceptance Criteria` is the contract on both surfaces.** The heading IS the idempotency anchor — no HTML comment markers. `/create-story` seeds it in the JIRA description; `/push-story` Phase 5 seeds it in the PR body (creating the section if Phase 5a's existing PR was missing it); `/update-qa-steps` replaces both sets of contents in lockstep once the diff is real.
+9. **Flags are pass-through.** Don't try to interpret `--points`, `--priority`, etc. here — forward them to `/create-story` and let that skill handle validation. The flags `/push-story` consumes itself are `--dry-run` (stops the chain after Phase 2d) and `--no-transition` (skips Phase 8).
+10. **Never auto-stage sensitive files.** The Phase 4 scan is non-negotiable.
+11. **Branch name uses the ticket's summary, not `$ARGUMENTS`.** This applies only when we're creating a new branch in Phase 3. Pre-existing branches (Phase 2.5) keep whatever name they have.
+12. **Fail-soft after PR creation.** Once the GitHub PR is open (or once we enter update mode), every JIRA error (AC sync, PR comment, transitions) is non-fatal — print manual recovery info, don't roll back.
+13. **Surface `/create-story` Notes.** If `/create-story` had to drop the sprint, skip the parent, fall back on priority, etc., echo those notes in Phase 9 so the user isn't surprised by the ticket's final state.
+14. **The skill is iterable.** As `/create-story`'s heuristics and `/update-qa-steps`'s AC style improve, this skill stays lean. Resist the urge to inline logic from either delegate.
