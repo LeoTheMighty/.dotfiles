@@ -130,6 +130,7 @@ function set_aliases() {
     alias kmcl="blessh dev mycase@stag7console1.stag.mc"
     alias kmcl2="blessh dev mycase@stag7console2.stag.mc"
     alias pmca="ec2-connect prod-ec2-access-role-sso prod3console"
+    alias pmcl="ec2-connect prod-ec2-access-role-sso prod7console"
     alias rrmca="ecs-connect-read-replica prodclone shared"
     alias leomca="blessh rr mycase@leo.rr.mycased.com"
     # MyCase DIRECT Console Access
