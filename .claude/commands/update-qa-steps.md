@@ -1,6 +1,6 @@
 # Update QA Steps
 
-Regenerate the non-technical **Acceptance Criteria** checklist for a PR — concrete, user-visible items derived from the diff — and sync them into BOTH the PR description and the linked LOR JIRA ticket. Idempotent — re-running replaces the existing `## Acceptance Criteria` section in place instead of stacking.
+Regenerate the non-technical **Acceptance Criteria** checklist for a PR — concrete, user-visible items derived from the diff — and sync them into BOTH the PR description and the linked AIP JIRA ticket. Idempotent — re-running replaces the existing `## Acceptance Criteria` section in place instead of stacking.
 
 The section heading (`## Acceptance Criteria`) is the contract. `/create-story` writes a placeholder version of this section at ticket-creation time; this skill replaces its contents once the PR diff makes the real testable items obvious. Same heading, same `- [ ]` checkbox format — kept in lockstep between PR and JIRA.
 
@@ -33,7 +33,7 @@ Capture: `$PR_NUMBER`, `$PR_URL`, `$OWNER/$REPO`.
 
 ---
 
-## Phase 1: Extract LOR ticket — flag loudly if missing
+## Phase 1: Extract AIP ticket — flag loudly if missing
 
 This is the **"always flag if a PR is not attached to a ticket"** behavior.
 
@@ -42,9 +42,9 @@ TITLE=$(gh pr view $PR_NUMBER --json title --jq .title)
 BODY=$(gh pr view $PR_NUMBER --json body --jq .body)
 BRANCH=$(gh pr view $PR_NUMBER --json headRefName --jq .headRefName)
 
-TITLE_KEYS=$(echo "$TITLE" | grep -oE '\bLOR-[0-9]+\b' | sort -u)
-BODY_KEYS=$(echo "$BODY"   | grep -oE '\bLOR-[0-9]+\b' | sort -u)
-BRANCH_KEYS=$(echo "$BRANCH" | grep -oE '\bLOR-[0-9]+\b' | sort -u | tr 'a-z' 'A-Z')
+TITLE_KEYS=$(echo "$TITLE" | grep -oE '\bAIP-[0-9]+\b' | sort -u)
+BODY_KEYS=$(echo "$BODY"   | grep -oE '\bAIP-[0-9]+\b' | sort -u)
+BRANCH_KEYS=$(echo "$BRANCH" | grep -oE '\bAIP-[0-9]+\b' | sort -u | tr 'a-z' 'A-Z')
 ```
 
 Decision tree:
@@ -62,14 +62,14 @@ Decision tree:
 
 ```
 ═════════════════════════════════════════════════════════════════════════
-⚠️  PR #<num> is not properly attached to a LOR ticket.
+⚠️  PR #<num> is not properly attached to a AIP ticket.
 
   Title:       <title status>
   Description: <body status>
   Branch:      <branch status>
 
-  Fix with:    gh pr edit <num> --title "LOR-NNNN: <title>" \
-                                --body-file - <<< "<body with LOR-NNNN>"
+  Fix with:    gh pr edit <num> --title "AIP-NNNN: <title>" \
+                                --body-file - <<< "<body with AIP-NNNN>"
 
   Continuing in: <PR-only mode | with key from <where>>
 ═════════════════════════════════════════════════════════════════════════
@@ -166,7 +166,7 @@ No HTML comment markers — the `## Acceptance Criteria` heading itself is the i
 If `$ARGUMENTS` contained `preview` (case-insensitive substring):
 
 1. Print `$AC_BLOCK` to the console.
-2. Print where it WOULD be synced: `"Would update PR #<num> and JIRA <key>"` (or `"PR #<num> only — no LOR ticket attached"`).
+2. Print where it WOULD be synced: `"Would update PR #<num> and JIRA <key>"` (or `"PR #<num> only — no AIP ticket attached"`).
 3. **STOP.** Do not write to GitHub or JIRA.
 
 Otherwise continue to Phase 6.
@@ -199,7 +199,7 @@ Clean up the temp file. If the edit fails, surface the error and STOP — don't 
 
 ## Phase 7: Update JIRA ticket description (R8)
 
-**Skip this phase entirely if no LOR ticket was found** (PR-only mode from Phase 1).
+**Skip this phase entirely if no AIP ticket was found** (PR-only mode from Phase 1).
 
 For `$TICKET_KEY`:
 
@@ -230,7 +230,7 @@ https://affinipay.atlassian.net/browse/<key>
 <full AC block>
 ```
 
-If the PR has no LOR ticket, the **JIRA Ticket** section is replaced with the warning banner from Phase 1 so the user is reminded.
+If the PR has no AIP ticket, the **JIRA Ticket** section is replaced with the warning banner from Phase 1 so the user is reminded.
 
 ---
 

@@ -1,6 +1,6 @@
 # Push Story
 
-Take work-in-progress (or a clean repo + an intent) and produce: a JIRA story in the LOR active sprint, a branch named after the ticket, a commit + push, a PR, and a non-technical **Acceptance Criteria** checklist mirrored in both the PR description and the JIRA ticket.
+Take work-in-progress (or a clean repo + an intent) and produce: a JIRA story in the AIP active sprint, a branch named after the ticket, a commit + push, a PR, and a non-technical **Acceptance Criteria** checklist mirrored in both the PR description and the JIRA ticket.
 
 **This skill is an orchestrator.** The two riskiest pieces are delegated to dedicated skills:
 - **Ticket creation** → `/create-story` (handles required-field plumbing, Investment Category / Capitalizable Project / Points / Priority heuristics, parent-epic search, retry loop)
@@ -13,17 +13,17 @@ See `_jira-helpers.md` for the shared discovery routines (R1–R10).
 ## Arguments — `$ARGUMENTS`
 
 ```
-/push-story [LOR-NNNN] [<summary words>] [--flag ...]
+/push-story [AIP-NNNN] [<summary words>] [--flag ...]
 ```
 
-The first token MAY be an existing ticket key (`LOR-NNNN`). Everything else is split into:
+The first token MAY be an existing ticket key (`AIP-NNNN`). Everything else is split into:
 - **Summary words** — positional tokens that aren't flags. These form the proposed summary when creating a new ticket, or are treated as extra context when an existing key is given.
 - **Pass-through flags** — any `--flag [value]` is forwarded to `/create-story` verbatim. See `/create-story` for the full flag list. The flags `/push-story` recognizes for pass-through:
 
 | Flag | Forwarded to | Effect |
 |---|---|---|
 | `--type <story\|bug\|spike>` | `/create-story` | Issue type override |
-| `--epic <LOR-NNNN>` | `/create-story` | Explicit parent (skips auto-search) |
+| `--epic <AIP-NNNN>` | `/create-story` | Explicit parent (skips auto-search) |
 | `--cap-project <name>` | `/create-story` | Capitalizable Project override |
 | `--category <name>` | `/create-story` | Investment Category override |
 | `--points <N>` | `/create-story` | Story Points override (Fibonacci only) |
@@ -34,15 +34,15 @@ The first token MAY be an existing ticket key (`LOR-NNNN`). Everything else is s
 | `--dry-run` | `/create-story` | Don't actually create the ticket (`/push-story` will also stop after Phase 2d) |
 | `--no-transition` | (consumed here) | Skip Phase 8 — don't transition the ticket to Code Review. Useful for draft PRs or exploratory pushes. |
 
-Flags only matter when creating a new ticket. If `LOR-NNNN` was passed, the flags are ignored (warn the user once).
+Flags only matter when creating a new ticket. If `AIP-NNNN` was passed, the flags are ignored (warn the user once).
 
 ### Examples
 
 - `/push-story` — infer summary from diff; search active-sprint tickets, else delegate to `/create-story`.
 - `/push-story Add retry to webhook handler` — search then create with all heuristic defaults.
 - `/push-story Add retry to webhook handler --points 2 --priority High` — same, but override points and priority.
-- `/push-story LOR-2345` — use existing ticket; commit diff and open PR.
-- `/push-story LOR-2345 also handle the timeout case` — existing ticket + extra context (the extra context goes into commit message + PR body, not the ticket).
+- `/push-story AIP-2345` — use existing ticket; commit diff and open PR.
+- `/push-story AIP-2345 also handle the timeout case` — existing ticket + extra context (the extra context goes into commit message + PR body, not the ticket).
 - `/push-story New checkout flow --type bug --cap-project "Checkout Optimization"` — bug variant on a specific cap project.
 - `/push-story Refactor session manager --dry-run` — see what `/create-story` would do without actually creating anything (skill stops at the end of Phase 2d).
 
@@ -85,24 +85,24 @@ If `$HAS_CHANGES=true`:
 ## Phase 2: Resolve OR create the ticket
 
 Parse `$ARGUMENTS`:
-- First positional token matches `^LOR-\d+$` → `$TICKET_KEY` = first token; remaining positional words = extra context (used in commit/PR body, NOT the ticket).
+- First positional token matches `^AIP-\d+$` → `$TICKET_KEY` = first token; remaining positional words = extra context (used in commit/PR body, NOT the ticket).
 - Else → `$TICKET_KEY = null`; positional words = proposed summary.
 - Either way, collect `--*` flags as `$PASSTHROUGH_FLAGS`.
 
-If `$TICKET_KEY` is set AND `$PASSTHROUGH_FLAGS` is non-empty: warn `"Flags [<list>] are ignored when an existing LOR key is given."` and drop them.
+If `$TICKET_KEY` is set AND `$PASSTHROUGH_FLAGS` is non-empty: warn `"Flags [<list>] are ignored when an existing AIP key is given."` and drop them.
 
 ### Phase 2a: Discovery (parallel)
 
 - R1 `get_cloud_id` → `$CLOUD_ID`
 - R2 `get_my_account_id` → `$MY_ACCOUNT_ID`
-- R3 `get_active_lor_sprint` → `$ACTIVE_SPRINT` (id + name)
+- R3 `get_active_aip_sprint` → `$ACTIVE_SPRINT` (id + name)
 
 If `$ACTIVE_SPRINT` is empty (no open sprint), warn and ask: "Continue anyway (ticket will land in backlog)?"
 
 ### Phase 2b: Existing-ticket validation (if `$TICKET_KEY` given)
 
-1. `getJiraIssue` for `$TICKET_KEY`. Verify project = `LOR`. If not, **STOP** with "Ticket is not in LOR."
-2. R5 `validate_in_active_sprint($TICKET_KEY)`. If not in active sprint, warn (`"LOR-XXXX is in [<sprint_names>], not the active sprint. Continue anyway?"`) — ask y/N.
+1. `getJiraIssue` for `$TICKET_KEY`. Verify project = `AIP`. If not, **STOP** with "Ticket is not in AIP."
+2. R5 `validate_in_active_sprint($TICKET_KEY)`. If not in active sprint, warn (`"AIP-XXXX is in [<sprint_names>], not the active sprint. Continue anyway?"`) — ask y/N.
 3. Read the ticket's `summary`, `status`, and `description` for later use.
 
 Jump to Phase 3.
@@ -114,7 +114,7 @@ Per the "search first" preference, look at the user's open in-sprint tickets bef
 ```
 mcp__plugin_FDK_atlassian__searchJiraIssuesUsingJql({
   cloudId: $CLOUD_ID,
-  jql: "project = LOR AND sprint = " + $ACTIVE_SPRINT.id + " AND assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC",
+  jql: "project = AIP AND sprint = " + $ACTIVE_SPRINT.id + " AND assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC",
   fields: ["summary", "status", "updated"],
   limit: 20
 })
@@ -123,10 +123,10 @@ mcp__plugin_FDK_atlassian__searchJiraIssuesUsingJql({
 Present:
 
 ```
-Your open LOR tickets in this sprint:
-  1. LOR-2345  In Progress     Cherry-pick fix for callback   (updated 2h ago)
-  2. LOR-2350  To Do           Refactor session manager       (updated 1d ago)
-  3. LOR-2351  In Code Review  Cleanup deprecated endpoint    (updated 3d ago)
+Your open AIP tickets in this sprint:
+  1. AIP-2345  In Progress     Cherry-pick fix for callback   (updated 2h ago)
+  2. AIP-2350  To Do           Refactor session manager       (updated 1d ago)
+  3. AIP-2351  In Code Review  Cleanup deprecated endpoint    (updated 3d ago)
 
 Pick a number to attach this work to, or 'new' to create. Default: new.
 ```
@@ -148,7 +148,7 @@ If `/push-story` was called with no positional summary words (i.e., the user ran
 - Example: a diff dominated by `app/webhooks/retry.rb` with `+ def with_backoff` becomes `"Add backoff to webhook retry"`.
 - Show the derived summary to the user before invoking `/create-story` (one-line confirm).
 
-**Capture the returned ticket key.** `/create-story`'s Phase 7 output leads with `Key: LOR-NNNN` on its own line. Parse it from the output. Also note the `Notes:` section if present (sprint dropped, parent skipped, etc.) so the final `/push-story` summary can surface those.
+**Capture the returned ticket key.** `/create-story`'s Phase 7 output leads with `Key: AIP-NNNN` on its own line. Parse it from the output. Also note the `Notes:` section if present (sprint dropped, parent skipped, etc.) so the final `/push-story` summary can surface those.
 
 **Handling `/create-story` outcomes:**
 
@@ -156,7 +156,7 @@ If `/push-story` was called with no positional summary words (i.e., the user ran
 |---|---|
 | Success — ticket created | Continue to Phase 3 with the new `$TICKET_KEY`. |
 | `/create-story --dry-run` was forwarded | `/create-story` prints the payload but doesn't create. **STOP** here — there's no ticket to branch from. Echo `/create-story`'s output as the final summary. |
-| 3-attempt retry exhausted | `/create-story` printed the full failure block with a manual JIRA URL. **STOP**. Tell the user: "Ticket creation failed — create manually using the link above, then re-run `/push-story LOR-NNNN`." |
+| 3-attempt retry exhausted | `/create-story` printed the full failure block with a manual JIRA URL. **STOP**. Tell the user: "Ticket creation failed — create manually using the link above, then re-run `/push-story AIP-NNNN`." |
 | User aborted inside `/create-story` (e.g., declined a prompt) | **STOP**. Don't branch / commit. |
 
 ---
@@ -363,8 +363,8 @@ The PR is open, the AC is synced, the comment is attached — the ticket is now 
 Run R6 `transition_to($TICKET_KEY, "code review")` from `_jira-helpers.md`.
 
 Handle outcomes:
-- `{result: "noop"}` — already in Code Review. Log `"LOR-XXXX already in Code Review"`. Common when re-running `/push-story` on a ticket that came back from Pushback.
-- `{result: "ok"}` — log `"✓ LOR-XXXX → Code Review"`.
+- `{result: "noop"}` — already in Code Review. Log `"AIP-XXXX already in Code Review"`. Common when re-running `/push-story` on a ticket that came back from Pushback.
+- `{result: "ok"}` — log `"✓ AIP-XXXX → Code Review"`.
 - `{result: "error", reason: "no transition to code review", available: [...]}` — the workflow doesn't allow Code Review from the ticket's current status. Print the available transitions and surface the issue. Do not auto-pick. Common cause: ticket sits in a non-standard state (Blocked, On Hold) that doesn't directly transition to Code Review.
 - `{result: "ambiguous", options: [...]}` — multiple transitions land in Code Review. Ask the user which to use.
 - Any other error — print verbatim and surface.
@@ -422,7 +422,7 @@ Restore the user to a sensible state:
 
 1. **This skill is an orchestrator.** Don't reinvent ticket creation or AC generation here — delegate to `/create-story` and `/update-qa-steps`. When those skills evolve, this one inherits the improvements.
 2. **Stop the chain on critical failures.** If `/create-story` fails (3-retry exhausted, user aborts, or `--dry-run`), don't branch / commit / push — the work has no JIRA home.
-3. **Project guard.** Only LOR tickets. If passed a non-LOR key, refuse before touching the working tree.
+3. **Project guard.** Only AIP tickets. If passed a non-AIP key, refuse before touching the working tree.
 4. **Active-sprint scope.** New tickets land in the active sprint (delegated to `/create-story` — overridable via `--backlog`). Existing tickets get a warn-and-confirm if they're in a different sprint.
 5. **Search before create.** When no key is passed, run the JQL probe first. This avoids the user accidentally creating a duplicate of in-flight work.
 6. **Never delete or recreate an existing PR.** If `/push-story` is run on a branch with an open PR, Phase 5a is the only path — augment the body in place. The schema (`lor-NNNN-kebab`) is a default for *new* branches, not a constraint to enforce on existing work. Closing a PR to "rename" it would lose review history, inline threads, and CI state.

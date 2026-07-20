@@ -1,27 +1,27 @@
 # Create Story
 
-Create a JIRA story (or bug / spike) in the LOR project with sane defaults and a careful, error-driven retry loop for required-field plumbing. Designed for the in-flight engineering workflow — not for grooming. Used standalone OR by `/push-story` when no key is given.
+Create a JIRA story (or bug / spike) in the AIP project with sane defaults and a careful, error-driven retry loop for required-field plumbing. Designed for the in-flight engineering workflow — not for grooming. Used standalone OR by `/push-story` when no key is given.
 
 > **This skill is the riskiest in the JIRA workflow** because JIRA's required-field surface is opaque and varies by project / workflow. Read the **"Trial-and-error posture"** section below before iterating on this skill.
 
 See `_jira-helpers.md` for shared routines:
 - R1 `get_cloud_id`
 - R2 `get_my_account_id`
-- R3 `get_active_lor_sprint`
+- R3 `get_active_aip_sprint`
 
 Arguments: `$ARGUMENTS`
 
 Everything up to the first `--flag` is the **summary**. Flags can appear in any order:
 
 ```
-/create-story <summary> [--type story|bug|spike] [--epic LOR-NNNN] [--cap-project <name>] [--category <name>] [--points N] [--priority <name>] [--backlog] [--description-file <path>] [--dry-run] [--no-prompt]
+/create-story <summary> [--type story|bug|spike] [--epic AIP-NNNN] [--cap-project <name>] [--category <name>] [--points N] [--priority <name>] [--backlog] [--description-file <path>] [--dry-run] [--no-prompt]
 ```
 
 Examples:
 - `/create-story Add retry to webhook handler` — heuristic-derived category / cap-project / points / priority / parent; assigned to active sprint
 - `/create-story Webhook 500s on duplicate event --type bug --priority High` — bug variant with explicit priority
 - `/create-story Investigate API latency on cold start --type spike --backlog --points 3` — spike, backlog, explicit points
-- `/create-story Refactor session manager --epic LOR-1000` — explicit epic skips parent auto-search
+- `/create-story Refactor session manager --epic AIP-1000` — explicit epic skips parent auto-search
 - `/create-story Add AI legal research tab --cap-project "AI Legal Research"` — explicit cap-project; parent search runs against it
 - `/create-story Test the create flow --dry-run` — assemble + print the payload but DON'T call the API
 
@@ -31,7 +31,7 @@ Examples:
 
 Building a reliable JIRA `createJiraIssue` is hard because:
 
-1. **Required fields vary by project, by issue type, and by workflow.** What's required for a LOR Story today may not be what's required tomorrow if the project admin adds a field.
+1. **Required fields vary by project, by issue type, and by workflow.** What's required for a AIP Story today may not be what's required tomorrow if the project admin adds a field.
 2. **The JIRA error response is the source of truth.** Don't trust your assumptions about what fields are needed — trust JIRA's `400` response.
 3. **Some required fields have safe defaults**, others don't. Drive the difference from the error, not from a hard-coded list in this file.
 
@@ -46,14 +46,14 @@ The skill is built around a **try → parse → fill → retry** loop:
 
 This loop is the iterative-improvement surface — over time, fields that show up in the prompt step a lot can be promoted to Phase 4 defaults.
 
-> **Field source-of-truth:** The lists in Phase 3 (Investment Category, Capitalizable Project, etc.) are cached from `getJiraIssueTypeMetaWithFields` and drift over time. If a user requests a value not in the cached list, call `getJiraIssueTypeMetaWithFields(cloudId, "LOR", "10001")` to refresh — JIRA's response wins.
+> **Field source-of-truth:** The lists in Phase 3 (Investment Category, Capitalizable Project, etc.) are cached from `getJiraIssueTypeMetaWithFields` and drift over time. If a user requests a value not in the cached list, call `getJiraIssueTypeMetaWithFields(cloudId, "AIP", "10001")` to refresh — JIRA's response wins.
 
 ---
 
 ## Phase 0: Parse arguments + defaults
 
 Set defaults:
-- `$PROJECT_KEY = "LOR"` (hard-coded — `/create-story` is LOR-only)
+- `$PROJECT_KEY = "AIP"` (hard-coded — `/create-story` is AIP-only)
 - `$ISSUE_TYPE = "Story"` (override via `--type`)
 - `$SPRINT_MODE = "active"` (override via `--backlog`)
 - `$DRY_RUN = false` (`true` via `--dry-run`)
@@ -78,9 +78,9 @@ Validate `--type`:
 
 - R1 `get_cloud_id` → `$CLOUD_ID`
 - R2 `get_my_account_id` → `$MY_ACCOUNT_ID`
-- R3 `get_active_lor_sprint` → `$ACTIVE_SPRINT` (only if `$SPRINT_MODE = active`)
+- R3 `get_active_aip_sprint` → `$ACTIVE_SPRINT` (only if `$SPRINT_MODE = active`)
 
-If `$SPRINT_MODE = active` and `$ACTIVE_SPRINT` is missing, ask the user: "No open sprint on LOR right now. Create in backlog instead? [Y/n]". Default yes.
+If `$SPRINT_MODE = active` and `$ACTIVE_SPRINT` is missing, ask the user: "No open sprint on AIP right now. Create in backlog instead? [Y/n]". Default yes.
 
 ---
 
@@ -109,7 +109,7 @@ If `$NO_PROMPT = false` and the description is auto-generated, show it to the us
 
 ## Phase 3: Custom fields — heuristic-first, confirm
 
-Five fields are populated here, each with a smart-guess so the user only confirms once instead of answering five separate prompts. The known-required ones for LOR Stories are **Investment Category** (`customfield_11045`) and **Summary/Issue Type/Project/Reporter** (system). The rest (Capitalizable Project, Story Points, Priority, Parent) are *optional in schema* but we always set them because the team's reporting and grooming workflow depends on them.
+Five fields are populated here, each with a smart-guess so the user only confirms once instead of answering five separate prompts. The known-required ones for AIP Stories are **Investment Category** (`customfield_11045`) and **Summary/Issue Type/Project/Reporter** (system). The rest (Capitalizable Project, Story Points, Priority, Parent) are *optional in schema* but we always set them because the team's reporting and grooming workflow depends on them.
 
 ### 3a. Investment Category (`customfield_11045`) — REQUIRED
 
@@ -222,7 +222,7 @@ Optional in schema (defaults to "Other"), but we always pick the best match beca
 |---|---|---|
 | AI Platform Q126 | AI Platform Q226 | 15359 |
 
-If a user requests a value that is neither in the table above nor a known legacy alias, refresh by calling `getJiraIssueTypeMetaWithFields(cloudId, "LOR", "10001")` and re-match — admins do add new options occasionally (true drift).
+If a user requests a value that is neither in the table above nor a known legacy alias, refresh by calling `getJiraIssueTypeMetaWithFields(cloudId, "AIP", "10001")` and re-match — admins do add new options occasionally (true drift).
 
 ### 3c. Story Points (`customfield_10005`) — Fibonacci complexity
 
@@ -255,7 +255,7 @@ If `$POINTS` was set via `--points`, validate it's in the Fibonacci set; reject 
 
 ### 3d. Priority (`priority`) — keyword-driven
 
-Always set. LOR has both legacy ("Blocker/Critical/Major/Minor/Trivial") and modern priorities; we use the **modern set**: Highest, High, Medium, Low, Lowest. JIRA's default is Medium.
+Always set. AIP has both legacy ("Blocker/Critical/Major/Minor/Trivial") and modern priorities; we use the **modern set**: Highest, High, Medium, Low, Lowest. JIRA's default is Medium.
 
 **Scale guide:**
 
@@ -284,14 +284,14 @@ If `$PRIORITY` was set via `--priority`, validate it's one of the modern five; r
 
 If `$EPIC_KEY` was set via `--epic`, use it directly and skip the search.
 
-Otherwise, fetch **all open Epics on the LOR board** and score them for relevance to the new story. The best one wins; ties or low confidence go to the user.
+Otherwise, fetch **all open Epics on the AIP board** and score them for relevance to the new story. The best one wins; ties or low confidence go to the user.
 
-**Step 1 — Fetch.** Get every open Epic in LOR (the board scope):
+**Step 1 — Fetch.** Get every open Epic in AIP (the board scope):
 
 ```
 mcp__atlassian__searchJiraIssuesUsingJql({
   cloudId: $CLOUD_ID,
-  jql: 'project = LOR AND issuetype = Epic AND statusCategory != Done ORDER BY updated DESC',
+  jql: 'project = AIP AND issuetype = Epic AND statusCategory != Done ORDER BY updated DESC',
   fields: ["summary", "status", "updated", "customfield_11018", "labels"],
   maxResults: 100
 })
@@ -308,9 +308,9 @@ mcp__atlassian__searchJiraIssuesUsingJql({
 
 **Step 3 — Pick.** Sort by score descending.
 
-- **Top score ≥ 50 AND beats #2 by ≥ 20** → auto-link. Output note: `Parent: LOR-NNNN (auto, score N, beat #2 by M)`.
+- **Top score ≥ 50 AND beats #2 by ≥ 20** → auto-link. Output note: `Parent: AIP-NNNN (auto, score N, beat #2 by M)`.
 - **Top score ≥ 50 but lead < 20** (close call) AND `$NO_PROMPT = false` → show the top 5 (key, summary, score, why-it-scored) and prompt: "Pick a number or `0` for none." Default to the top one.
-- **Top score < 50** AND `$NO_PROMPT = false` → show the top 5 anyway with a warning: "No strong match; best guess is LOR-NNNN. Pick a number or `0` for none." Default to `0` (no parent).
+- **Top score < 50** AND `$NO_PROMPT = false` → show the top 5 anyway with a warning: "No strong match; best guess is AIP-NNNN. Pick a number or `0` for none." Default to `0` (no parent).
 - **`$NO_PROMPT = true`** → only auto-link if Top score ≥ 70 AND beats #2 by ≥ 30 (a stricter bar for automation). Otherwise skip with note: `Parent: (skipped — top score N too weak for auto-pick; pass --epic to set)`.
 
 **Why score-then-pick instead of strict-filter:** earlier versions of this skill filtered Epics strictly by Cap Project ID, but that breaks down when (a) the Story's Cap Project is "Other" (~30% of cases), (b) the Epic is tagged with a different but related Cap Project, or (c) the Epic was created before Cap Projects were rolled out. Scoring across all open Epics handles those cases gracefully — Cap Project remains the dominant signal when present, summary-overlap fills in otherwise.
@@ -324,7 +324,7 @@ mcp__atlassian__searchJiraIssuesUsingJql({
 ```json
 {
   "cloudId": "$CLOUD_ID",
-  "projectKey": "LOR",
+  "projectKey": "AIP",
   "issueTypeName": "$ISSUE_TYPE",
   "summary": "$SUMMARY",
   "description": "$DESCRIPTION",
@@ -414,7 +414,7 @@ Payload attempted:
   <pretty-printed JSON>
 
 Create manually:
-  https://affinipay.atlassian.net/jira/software/c/projects/LOR/issues/?jql=
+  https://affinipay.atlassian.net/jira/software/c/projects/AIP/issues/?jql=
   (Use the "+ Create" button. Copy fields from the payload above.)
 ═════════════════════════════════════════════════════════════════════════
 ```
@@ -436,7 +436,7 @@ getJiraIssue({
 ```
 
 Confirm:
-- Project key starts with `LOR-`
+- Project key starts with `AIP-`
 - Summary matches what we sent
 - Assignee accountId = `$MY_ACCOUNT_ID`
 - Priority name = `$PRIORITY`
@@ -457,10 +457,10 @@ The output format MUST be parseable by `/push-story` (which extracts the key). L
 
 ```
 ═════════════════════════════════════════════════════════════════════════
-✓ Created LOR-NNNN
+✓ Created AIP-NNNN
 
-Key:         LOR-NNNN
-URL:         https://affinipay.atlassian.net/browse/LOR-NNNN
+Key:         AIP-NNNN
+URL:         https://affinipay.atlassian.net/browse/AIP-NNNN
 Summary:     <summary>
 Type:        <type>
 Status:      <status>
@@ -482,7 +482,7 @@ If we had to drop the sprint, drop the parent, swap an epic-link shape, fall bac
 
 ## Important Rules
 
-1. **LOR project only.** Hard-coded. Refuse anything else.
+1. **AIP project only.** Hard-coded. Refuse anything else.
 2. **The error response is the source of truth.** Never silently fill required fields based on guesses — always prompt the user OR use a known-safe default and warn.
 3. **Cap the retry loop at 3.** Don't loop forever. Better to dump everything and let the user finish manually than spam JIRA with bad payloads.
 4. **Cache `$LAST_CAP_PROJECT` in-session.** Don't re-ask Capitalizable Project for back-to-back calls — it's almost always the same per work area.
