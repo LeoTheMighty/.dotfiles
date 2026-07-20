@@ -110,7 +110,7 @@ From the combined results, collect:
 This data feeds into **Phase 2.5** below.
 
 ### JIRA Ticket
-Extract the JIRA ticket ID from the PR branch name or PR body. Look for patterns like `[A-Z]+-\d+` (e.g., `LOR-2160`, `HAL-1234`).
+Extract the JIRA ticket ID from the PR branch name or PR body. Look for patterns like `[A-Z]+-\d+` (e.g., `AIP-2160`, `HAL-1234`).
 If found, fetch the ticket using the Atlassian MCP tool:
 - Use `mcp__plugin_FDK_atlassian__getJiraIssue` with the ticket ID
 - Extract: summary, description, acceptance criteria, story points, status

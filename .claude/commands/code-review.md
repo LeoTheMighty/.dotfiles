@@ -128,32 +128,32 @@ From the combined results, collect:
 This data feeds into **Phase 2.5** below.
 
 ### JIRA Ticket
-Extract the JIRA ticket ID from the PR title, PR body, and branch name. Look for patterns like `[A-Z]+-\d+` (e.g., `LOR-2160`, `HAL-1234`).
+Extract the JIRA ticket ID from the PR title, PR body, and branch name. Look for patterns like `[A-Z]+-\d+` (e.g., `AIP-2160`, `HAL-1234`).
 If found, fetch the ticket using the Atlassian MCP tool:
 - Use `mcp__plugin_FDK_atlassian__getJiraIssue` with the ticket ID (and `cloudId` from `getAccessibleAtlassianResources` — see `_jira-helpers.md` routine R1).
 - Extract: summary, description, acceptance criteria, story points, status
 - If the tool is unavailable or fails, note this and continue without JIRA context.
 
-### Phase 2.5b: LOR ticket check (title + description)
+### Phase 2.5b: AIP ticket check (title + description)
 
 **This phase records ticket-hygiene findings to surface in the review — it does NOT block.** Always continue to Phase 3 afterward, regardless of outcome. See `_jira-helpers.md` for the parsing pattern.
 
 ```bash
 TITLE=$(gh pr view <number> --json title --jq .title)
 BODY=$(gh pr view <number> --json body --jq .body)
-TITLE_KEYS=$(echo "$TITLE" | grep -oE '\bLOR-[0-9]+\b' | sort -u)
-BODY_KEYS=$(echo "$BODY"  | grep -oE '\bLOR-[0-9]+\b' | sort -u)
+TITLE_KEYS=$(echo "$TITLE" | grep -oE '\bAIP-[0-9]+\b' | sort -u)
+BODY_KEYS=$(echo "$BODY"  | grep -oE '\bAIP-[0-9]+\b' | sort -u)
 ```
 
-Classify the outcome and set `$PR_LOR_KEYS` accordingly. In every case below, **record a finding** that will be added to the review summary under a dedicated **"Ticket Hygiene"** section (see Phase 5), then continue.
+Classify the outcome and set `$PR_AIP_KEYS` accordingly. In every case below, **record a finding** that will be added to the review summary under a dedicated **"Ticket Hygiene"** section (see Phase 5), then continue.
 
-- **Both empty** → Record a **[warning]** finding: `"No LOR ticket attached to this PR — neither the title nor the description references a JIRA ticket. Please tag the PR with its LOR-NNNN key so the change is traceable to a tracked unit of work."` Include the copy-paste fix commands (`gh pr edit <number> --title "LOR-NNNN: <existing title>"` and the `--body-file -` equivalent). Set `$PR_LOR_KEYS=""` (Phase 7 will skip).
-- **Title empty, body has keys** → Record a **[nitpick]** finding: `"LOR ticket [<keys>] found in description but not title. Add the key to the title for visibility."` Set `$PR_LOR_KEYS=<body_keys>` so Phase 7 can still transition the ticket.
-- **Body empty, title has keys** → Record a **[nitpick]** finding: `"LOR ticket [<keys>] found in title but not description. Add the key to the description."` Set `$PR_LOR_KEYS=<title_keys>`.
-- **Both have keys, no intersection** → Record a **[warning]** finding: `"LOR keys mismatch: title=[<title_keys>], description=[<body_keys>]. Confirm which ticket this PR is implementing."` Set `$PR_LOR_KEYS=""` so Phase 7 does not transition the wrong ticket. Ask the user to confirm in chat.
-- **Both have keys, intersection non-empty** → No finding. Use the intersection as `$PR_LOR_KEYS`.
+- **Both empty** → Record a **[warning]** finding: `"No AIP ticket attached to this PR — neither the title nor the description references a JIRA ticket. Please tag the PR with its AIP-NNNN key so the change is traceable to a tracked unit of work."` Include the copy-paste fix commands (`gh pr edit <number> --title "AIP-NNNN: <existing title>"` and the `--body-file -` equivalent). Set `$PR_AIP_KEYS=""` (Phase 7 will skip).
+- **Title empty, body has keys** → Record a **[nitpick]** finding: `"AIP ticket [<keys>] found in description but not title. Add the key to the title for visibility."` Set `$PR_AIP_KEYS=<body_keys>` so Phase 7 can still transition the ticket.
+- **Body empty, title has keys** → Record a **[nitpick]** finding: `"AIP ticket [<keys>] found in title but not description. Add the key to the description."` Set `$PR_AIP_KEYS=<title_keys>`.
+- **Both have keys, no intersection** → Record a **[warning]** finding: `"AIP keys mismatch: title=[<title_keys>], description=[<body_keys>]. Confirm which ticket this PR is implementing."` Set `$PR_AIP_KEYS=""` so Phase 7 does not transition the wrong ticket. Ask the user to confirm in chat.
+- **Both have keys, intersection non-empty** → No finding. Use the intersection as `$PR_AIP_KEYS`.
 
-If the user passes a focus instruction like `skip-ticket-guard` (case-insensitive substring), skip this phase entirely (no finding, `$PR_LOR_KEYS=""`).
+If the user passes a focus instruction like `skip-ticket-guard` (case-insensitive substring), skip this phase entirely (no finding, `$PR_AIP_KEYS=""`).
 
 ### Read Changed Files in Full
 For every file in the diff, read the FULL file (not just the diff hunks) to understand the surrounding context. This is critical for catching issues that depend on how the changed code interacts with existing code.
@@ -262,9 +262,9 @@ Organize the summary by semantic chunk, with findings grouped by severity. If th
 
 ### Ticket Hygiene
 <Include ONLY if Phase 2.5b recorded a finding. Examples:>
-- **[warning]** No LOR ticket attached to this PR — neither the title nor the description references a JIRA ticket. Please tag the PR with its LOR-NNNN key. Fix:
+- **[warning]** No AIP ticket attached to this PR — neither the title nor the description references a JIRA ticket. Please tag the PR with its AIP-NNNN key. Fix:
   ```bash
-  gh pr edit <number> --title "LOR-NNNN: <existing title>"
+  gh pr edit <number> --title "AIP-NNNN: <existing title>"
   ```
 
 ### Previous Review Follow-up
@@ -343,18 +343,18 @@ Only include **new** findings as inline comments. Do NOT re-post inline comments
 
 Exit and remove the worktree. Use `ExitWorktree` with `action: "remove"` and `discard_changes: true` (since the worktree only has the checked-out PR branch, no original work).
 
-## Phase 7: Transition LOR ticket to Pushback
+## Phase 7: Transition AIP ticket to Pushback
 
 **This phase ONLY runs if Phase 5 successfully posted the new review (or successfully posted previous-thread replies, if there were no new findings). If Phase 5 failed, skip this phase — don't transition the ticket if the review didn't actually land.**
 
-**If `$PR_LOR_KEYS` is empty** (no ticket attached, or title/description mismatch from Phase 2.5b), skip this phase. Log a one-line note: `"Skipping JIRA transition — no LOR ticket attached to PR (surfaced in Ticket Hygiene section of review)."` Do not prompt the user for a ticket key; the Ticket Hygiene finding in the review already asks the author to add one.
+**If `$PR_AIP_KEYS` is empty** (no ticket attached, or title/description mismatch from Phase 2.5b), skip this phase. Log a one-line note: `"Skipping JIRA transition — no AIP ticket attached to PR (surfaced in Ticket Hygiene section of review)."` Do not prompt the user for a ticket key; the Ticket Hygiene finding in the review already asks the author to add one.
 
-For each key in `$PR_LOR_KEYS` (from Phase 2.5b):
+For each key in `$PR_AIP_KEYS` (from Phase 2.5b):
 
 1. Run R6 `transition_to(key, "pushback")` from `_jira-helpers.md`.
 2. Handle outcomes:
-   - `{result: "noop"}` — already at Pushback. Log `"LOR-XXXX already in Pushback"`.
-   - `{result: "ok"}` — log `"✓ LOR-XXXX → Pushback"`.
+   - `{result: "noop"}` — already at Pushback. Log `"AIP-XXXX already in Pushback"`.
+   - `{result: "ok"}` — log `"✓ AIP-XXXX → Pushback"`.
    - `{result: "error", reason: "no transition to pushback", available: [...]}` — the ticket's current status doesn't allow moving to Pushback directly (e.g., the workflow disallows Done → Pushback). Print the available transitions and ask the user. **Do not retry automatically.**
    - Any other error — print and ask.
 

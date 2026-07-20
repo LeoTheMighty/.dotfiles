@@ -96,7 +96,7 @@ gh pr diff <number>
 If the diff is large, save to a temp file and read in chunks.
 
 ### 2c. JIRA Ticket
-Extract the JIRA ticket ID from the PR branch name or PR body. Look for patterns like `[A-Z]+-\d+` (e.g., `LOR-2160`, `HAL-1234`).
+Extract the JIRA ticket ID from the PR branch name or PR body. Look for patterns like `[A-Z]+-\d+` (e.g., `AIP-2160`, `HAL-1234`).
 If found, fetch the ticket using the Atlassian MCP tool:
 - Use `mcp__plugin_FDK_atlassian__getJiraIssue` with the ticket ID
 - Extract: summary, description, acceptance criteria, story points, status
@@ -428,20 +428,20 @@ If any were missed, go back and handle them now.
 
 **If the stash pop fails** (conflict), warn the user and leave the stash in place — do NOT force it.
 
-### 7c. Transition LOR ticket to Code Review
+### 7c. Transition AIP ticket to Code Review
 
 **Only runs when BOTH conditions hold:**
 - Phase 5 actually pushed at least one commit (i.e., 5a–5d ran — not just the reply-only path).
-- A `LOR-NNNN` key was extracted from the PR (Phase 2c).
+- A `AIP-NNNN` key was extracted from the PR (Phase 2c).
 
 If you only replied to comments without pushing code, **skip this phase** — moving the ticket back to Code Review when nothing changed would be misleading. The reviewer can re-review the existing commits without a state change.
 
-For each LOR key:
+For each AIP key:
 
 1. Run R6 `transition_to(key, "code review")` from `_jira-helpers.md`.
 2. Handle outcomes:
-   - `{result: "noop"}` — already in Code Review. Log `"LOR-XXXX already in Code Review"`.
-   - `{result: "ok"}` — log `"✓ LOR-XXXX → Code Review"`.
+   - `{result: "noop"}` — already in Code Review. Log `"AIP-XXXX already in Code Review"`.
+   - `{result: "ok"}` — log `"✓ AIP-XXXX → Code Review"`.
    - `{result: "error", reason: "no transition to code review", available: [...]}` — print the available transitions and tell the user; don't auto-pick. Common reason: the ticket is in a state (like "Blocked") where Code Review isn't a direct transition.
    - Any other error — print and ask.
 

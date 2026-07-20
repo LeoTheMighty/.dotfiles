@@ -1,6 +1,6 @@
 # Update Released Tickets
 
-After a production release has been validated, move every LOR JIRA ticket attached to the release's PRs into **Done**. Set yourself as Tester only if the transition fails because Tester is required.
+After a production release has been validated, move every AIP JIRA ticket attached to the release's PRs into **Done**. Set yourself as Tester only if the transition fails because Tester is required.
 
 See `_jira-helpers.md` for the shared discovery routines (R1–R9) referenced below.
 
@@ -44,7 +44,7 @@ If zero PRs found, **STOP** and tell the user — the release body is probably n
 
 ---
 
-## Phase 2: Resolve PRs → LOR ticket keys
+## Phase 2: Resolve PRs → AIP ticket keys
 
 For each PR ref, in parallel:
 
@@ -54,13 +54,13 @@ gh pr view <ref-or-url> --json title,body,headRefName,url --jq .
 
 For each PR:
 1. Combine `title + " " + body + " " + headRefName`.
-2. Apply R4 (`extract_ticket_keys`): split into `lor_keys` and `other_keys`.
-3. If `lor_keys` is empty → log `"PR <url> has no LOR ticket (other keys: [other_keys] — skipped)"`.
-4. If `other_keys` is non-empty → warn `"PR <url> referenced [other_keys] which are not LOR tickets — ignored"`.
+2. Apply R4 (`extract_ticket_keys`): split into `aip_keys` and `other_keys`.
+3. If `aip_keys` is empty → log `"PR <url> has no AIP ticket (other keys: [other_keys] — skipped)"`.
+4. If `other_keys` is non-empty → warn `"PR <url> referenced [other_keys] which are not AIP tickets — ignored"`.
 
-Dedupe LOR keys across all PRs (one ticket may appear in multiple PRs).
+Dedupe AIP keys across all PRs (one ticket may appear in multiple PRs).
 
-If the deduped list is empty, **STOP** with a summary: which PRs had no LOR keys, and ask if the user wants to add tickets manually.
+If the deduped list is empty, **STOP** with a summary: which PRs had no AIP keys, and ask if the user wants to add tickets manually.
 
 ---
 
@@ -70,13 +70,13 @@ Run once, in parallel:
 - R1 `get_cloud_id` → `$CLOUD_ID`
 - R2 `get_my_account_id` → `$MY_ACCOUNT_ID`
 
-(Skip R3 `get_active_lor_sprint` — released work may be from prior sprints.)
+(Skip R3 `get_active_aip_sprint` — released work may be from prior sprints.)
 
 ---
 
 ## Phase 4: Per-ticket status read + confirm table
 
-For each LOR key, fetch:
+For each AIP key, fetch:
 
 ```
 mcp__plugin_FDK_atlassian__getJiraIssue({
@@ -94,14 +94,14 @@ Build the confirm table:
 ```
 Release: <release name> (<tag>)
 PRs: <count>
-LOR tickets found: <count>
+AIP tickets found: <count>
 
 | Key       | Summary                          | Status         | Action                |
 |-----------|----------------------------------|----------------|-----------------------|
-| LOR-2345  | Cherry-pick fix for callback     | In Code Review | → Done                |
-| LOR-2348  | Add retry to webhook handler     | In QA          | → Done                |
-| LOR-2350  | Refactor session manager         | Done           | skip (already Done)   |
-| LOR-2351  | Cleanup deprecated endpoint      | In Progress    | → Done (unusual ⚠️)   |
+| AIP-2345  | Cherry-pick fix for callback     | In Code Review | → Done                |
+| AIP-2348  | Add retry to webhook handler     | In QA          | → Done                |
+| AIP-2350  | Refactor session manager         | Done           | skip (already Done)   |
+| AIP-2351  | Cleanup deprecated endpoint      | In Progress    | → Done (unusual ⚠️)   |
 ```
 
 Mark anything that's **two or more steps away from Done** (e.g., still "In Progress" or "To Do") with the ⚠️ — that ticket may not actually be released and is a likely human-error catch.
@@ -112,7 +112,7 @@ Ask once:
 Proceed with transitioning the <N> non-skipped tickets to Done? [y/N]
 ```
 
-If the user says no, exit cleanly. If they say yes with edits ("yes, but skip LOR-2351"), honor the exclusions.
+If the user says no, exit cleanly. If they say yes with edits ("yes, but skip AIP-2351"), honor the exclusions.
 
 ---
 
@@ -122,12 +122,12 @@ For each ticket in the confirmed list:
 
 1. Run R6 `transition_to(key, "done")`.
 2. Handle outcomes:
-   - `{result: "noop"}` → log `"LOR-XXXX already Done — skipped"`.
-   - `{result: "ok"}` → log `"✓ LOR-XXXX → Done"`.
+   - `{result: "noop"}` → log `"AIP-XXXX already Done — skipped"`.
+   - `{result: "ok"}` → log `"✓ AIP-XXXX → Done"`.
    - `{result: "error", reason: "JIRA rejected transition", errors: {Tester: ...}}` AND current Tester is empty AND target is Done:
      - Call R7 `set_tester(key, $MY_ACCOUNT_ID)`.
      - Retry R6 `transition_to(key, "done")` ONCE.
-     - On retry success: log `"✓ LOR-XXXX → Done (set Tester to you)"`.
+     - On retry success: log `"✓ AIP-XXXX → Done (set Tester to you)"`.
      - On retry failure: log error and add to the "ask user" list.
    - `{result: "error", reason: "no transition to done", available: [...]}` → add to "ask user" list with the available transitions printed.
    - `{result: "ambiguous", options: [...]}` → ask the user inline which to pick before moving on, OR collect and batch-ask at the end (your choice — batch is less interruption).
@@ -143,19 +143,19 @@ Process tickets sequentially (not in parallel) — JIRA workflow changes can hav
 ## Released Tickets — <release tag>
 
 ### Transitioned to Done (<count>)
-- LOR-2345  Cherry-pick fix for callback
-- LOR-2348  Add retry to webhook handler (set Tester to you)
+- AIP-2345  Cherry-pick fix for callback
+- AIP-2348  Add retry to webhook handler (set Tester to you)
 
 ### Already Done — skipped (<count>)
-- LOR-2350  Refactor session manager
+- AIP-2350  Refactor session manager
 
 ### Needs manual attention (<count>)
-- LOR-2351  Cleanup deprecated endpoint
+- AIP-2351  Cleanup deprecated endpoint
   Reason: JIRA rejected transition — required field 'Story Points' is empty
   Available transitions: To Do, Blocked
-  Link: https://affinipay.atlassian.net/browse/LOR-2351
+  Link: https://affinipay.atlassian.net/browse/AIP-2351
 
-### PRs with no LOR ticket (<count>) — informational only
+### PRs with no AIP ticket (<count>) — informational only
 - https://github.com/mycase/mc_aws_identity_center/pull/789 (branch: chore/bump-deps)
 ```
 
@@ -168,7 +168,7 @@ If anything is in "Needs manual attention," explicitly tell the user to handle t
 1. **Always confirm before bulk-transitioning.** The Phase 4 confirm table is non-negotiable. A single yes/no covers all tickets at once but you must show every key + status first.
 2. **Don't auto-fill any field except Tester.** If the Done transition fails for any other required field (Story Points, Resolution, etc.), surface and ask. Don't guess.
 3. **Don't overwrite an existing Tester.** Only set Tester when the field is currently empty AND the transition failed because of it.
-4. **Project guard.** Only touch tickets starting with `LOR-`. Other project tickets get a one-line warning and are dropped.
+4. **Project guard.** Only touch tickets starting with `AIP-`. Other project tickets get a one-line warning and are dropped.
 5. **Sprint guard relaxed.** Released work may be from prior sprints — don't filter on sprint here.
 6. **Fail-soft, but verbose.** Errors on individual tickets don't stop the loop. Collect them and report at the end.
 7. **Always print the JIRA URL on errors.** Manual recovery is one click away — don't make the user search.

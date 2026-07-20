@@ -3,14 +3,14 @@
 > **Not a slash command** — this file is referenced from `/update-released-tickets`, `/code-review`, `/address-pr`, and `/push-story`. It documents the discovery routines and shared posture every JIRA-aware skill follows so behavior is consistent.
 
 Atlassian instance: `affinipay.atlassian.net`
-JIRA project we touch: `LOR` (Left on Read)
+JIRA project we touch: `AIP` (AI Platform)
 MCP tool prefix: `mcp__plugin_FDK_atlassian__<toolName>`
 
 ---
 
 ## Posture (applies to every JIRA-aware skill)
 
-1. **Project guard** — only touch tickets whose key starts with `LOR-`. Any other key is *skipped with a warning*, never auto-transitioned.
+1. **Project guard** — only touch tickets whose key starts with `AIP-`. Any other key is *skipped with a warning*, never auto-transitioned.
 2. **Sprint guard** — for in-flight workflow skills (`/code-review`, `/address-pr`, `/push-story`), the ticket SHOULD be in the active sprint. If it isn't, surface the discrepancy and ask before transitioning. `/update-released-tickets` skips this guard (released work may have rolled over).
 3. **Idempotent transitions** — always read current status first. If already at the target, skip silently. Don't double-transition.
 4. **Fail-soft on JIRA when work is already complete** — `/code-review` and `/address-pr` complete the GitHub-side work BEFORE touching JIRA. If the JIRA transition fails, log it and tell the user, but don't crash — the review/replies/push are already done.
@@ -59,12 +59,12 @@ mcp__plugin_FDK_atlassian__searchJiraIssuesUsingJql({
 
 If both probes return zero results, prompt the user once for their accountId (rare).
 
-### R3. `get_active_lor_sprint`
+### R3. `get_active_aip_sprint`
 
 ```
 mcp__plugin_FDK_atlassian__searchJiraIssuesUsingJql({
   cloudId: $CLOUD_ID,
-  jql: "project = LOR AND sprint in openSprints()",
+  jql: "project = AIP AND sprint in openSprints()",
   fields: ["customfield_10007"],
   limit: 1
 })
@@ -77,7 +77,7 @@ If no open sprint exists, warn the user — `/push-story` cannot proceed without
 ### R4. `extract_ticket_keys(text)` — local string parsing
 
 Regex: `\b[A-Z]{2,}-\d+\b`. Dedupe (preserving order). Then split into:
-- `lor_keys` — keys whose prefix is exactly `LOR`.
+- `aip_keys` — keys whose prefix is exactly `AIP`.
 - `other_keys` — everything else (these get a warning, not silent drop, so the user knows we ignored them).
 
 ### R5. `validate_in_active_sprint(key)`
@@ -264,7 +264,7 @@ Same pattern as the FDK `attach-pr-to-jira` skill.
 
 ## Common parsing patterns
 
-### Extract LOR keys from a PR
+### Extract AIP keys from a PR
 
 ```bash
 gh pr view <number> --json title,body,headRefName --jq '.title + " " + .body + " " + .headRefName'
@@ -285,13 +285,13 @@ Then parse:
 
 Dedupe.
 
-### Detect "Left on Read" ticket in PR title + description
+### Detect "AI Platform" ticket in PR title + description
 
 ```bash
 TITLE=$(gh pr view <num> --json title --jq .title)
 BODY=$(gh pr view <num> --json body --jq .body)
-TITLE_KEYS=$(echo "$TITLE" | grep -oE '\bLOR-[0-9]+\b' | sort -u)
-BODY_KEYS=$(echo "$BODY" | grep -oE '\bLOR-[0-9]+\b' | sort -u)
+TITLE_KEYS=$(echo "$TITLE" | grep -oE '\bAIP-[0-9]+\b' | sort -u)
+BODY_KEYS=$(echo "$BODY" | grep -oE '\bAIP-[0-9]+\b' | sort -u)
 ```
 
 - Both empty → STOP and ask user to add a key.
@@ -313,8 +313,8 @@ When surfacing a JIRA error to the user, always include:
 Example:
 
 ```
-✗ Could not transition LOR-2345 to Done.
+✗ Could not transition AIP-2345 to Done.
   JIRA error: Field 'Story Points' is required.
   Available transitions from current status: [list]
-  Manual link: https://affinipay.atlassian.net/browse/LOR-2345
+  Manual link: https://affinipay.atlassian.net/browse/AIP-2345
 ```
