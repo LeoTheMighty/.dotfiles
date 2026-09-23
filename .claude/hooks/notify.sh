@@ -10,8 +10,10 @@
 # tmux session named `xirp-<uuid>` it targets that tab directly:
 #   - "View" focuses it with the xirp://open-session deep link, which raises the
 #     Xirp window (main process app.focus({steal:true})) and selects the tab.
-#   - "Allow"/"Always" are delivered with `tmux send-keys` to the asking PANE,
-#     so they can never land in whichever tab happens to be visible.
+#   - "Allow" is delivered with `tmux send-keys` to the asking PANE, so it can
+#     never land in whichever tab happens to be visible.
+#   - "Dismiss" does nothing at all -- it just closes the alert. Esc does the
+#     same, since Dismiss is the alert's cancel button.
 # Outside xirp it falls back to the old Terminal/iTerm2/Warp/VS Code behaviour.
 #
 # Env:
@@ -153,14 +155,28 @@ EOF
 }
 
 # True when the asking pane is still showing a Claude Code choice prompt.
+#
+# Keyed on the numbered option list alone. An earlier version also required the
+# literal "Do you want to " and that silently ate every Allow click: the
+# wording varies by prompt type and CLI version ("Do you want to proceed?",
+# "Would you like to proceed?", trust and MCP prompts differ again), so one
+# hardcoded phrase is not a safe gate.
+#
+# A false positive here is cheap -- answer() sends a bare digit with no Enter,
+# so at worst a stray "1" lands in the composer where you can see it. A false
+# negative loses the click outright, so this errs toward sending.
 pane_awaiting_choice() {
   [ -n "$PANE" ] || return 1
-  local tail_text
+  local tail_text opts
   tail_text=$(tmux capture-pane -p -t "$PANE" -S -25 2>/dev/null) || return 1
-  # Every Claude Code permission dialog asks "Do you want to ...?" and renders a
-  # numbered option list. Requiring both keeps ordinary output from matching.
-  printf '%s' "$tail_text" | grep -qE 'Do you want to ' || return 1
-  printf '%s' "$tail_text" | grep -qE '^[[:space:]]*.?[[:space:]]*2\.[[:space:]]' || return 1
+  # `[^0-9]*` rather than `.?` for the leading caret: the selection marker is
+  # multi-byte and a single `.` will not span it outside a UTF-8 locale.
+  opts=$(printf '%s' "$tail_text" | grep -cE '^[^0-9]*[12]\.[[:space:]]')
+  if [ "${opts:-0}" -lt 2 ]; then
+    log "guard: no option list in pane $PANE; tail: $(printf '%s' "$tail_text" \
+      | grep -vE '^[[:space:]]*$' | tail -4 | tr '\n' '|')"
+    return 1
+  fi
   return 0
 }
 
@@ -214,7 +230,9 @@ EOF
 }
 
 # show_alert <title> <message> <button1> [button2] [button3]
-# Last button is the default. Echoes the button label, or GAVEUP.
+# macOS caps `display alert` at three buttons. The FIRST is made the cancel
+# button, so Esc and a click both report it; the LAST is the default. Echoes
+# the button label, or GAVEUP on timeout.
 show_alert() {
   osascript - "$TIMEOUT" "$@" <<'EOF' 2>/dev/null
 on run argv
@@ -226,7 +244,12 @@ on run argv
     set end of btns to (item i of argv)
   end repeat
   set dflt to item (count of argv) of argv
-  set res to display alert theTitle message theMsg buttons btns default button dflt giving up after givingUp
+  set cncl to item 1 of btns
+  try
+    set res to display alert theTitle message theMsg buttons btns default button dflt cancel button cncl giving up after givingUp
+  on error number -128
+    return cncl
+  end try
   if gave up of res then return "GAVEUP"
   return button returned of res
 end run
@@ -282,20 +305,20 @@ print(json.dumps({"msg": f"{tool}: {desc}", "always": always}))
     ALWAYS_LABEL=$(printf '%s' "$PARSED" | "$PY" -c 'import sys,json; print(json.load(sys.stdin)["always"])' 2>/dev/null)
     [ -z "$MSG" ] && MSG="Needs permission"
 
-    if [ -n "$ALWAYS_LABEL" ]; then
-      RESPONSE=$(show_alert "$LABEL" "$MSG" "View" "$ALWAYS_LABEL" "Allow")
-    else
-      RESPONSE=$(show_alert "$LABEL" "$MSG" "View" "Allow")
-    fi
+    # Three buttons is the macOS ceiling, so "Always" gave up its slot to
+    # Dismiss. Its text still rides along in the message, so View then 2 is
+    # still one glance away.
+    [ -n "$ALWAYS_LABEL" ] && MSG="$MSG
+
+(2. $ALWAYS_LABEL)"
+    RESPONSE=$(show_alert "$LABEL" "$MSG" "Dismiss" "View" "Allow")
     log "response='$RESPONSE'"
 
-    if [ "$RESPONSE" = "Allow" ]; then
-      answer "1"
-    elif [ "$RESPONSE" = "View" ]; then
-      focus_tab
-    elif [ -n "$ALWAYS_LABEL" ] && [ "$RESPONSE" = "$ALWAYS_LABEL" ]; then
-      answer "2"
-    fi
+    case "$RESPONSE" in
+      Allow) answer "1" ;;
+      View)  focus_tab ;;
+      *)     ;;  # Dismiss or GAVEUP: leave the tab alone
+    esac
     ;;
 
   elicitation)
